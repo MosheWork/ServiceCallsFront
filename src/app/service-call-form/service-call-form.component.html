@@ -1,1 +1,62 @@
-<p>service-call-form works!</p>
+<div class="service-call-form" dir="rtl">
+    <h1>פתיחת קריאת שירות</h1>
+  
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+  
+      <div class="form-row">
+        <label for="title">כותרת *</label>
+        <input id="title" type="text" formControlName="title">
+        <div class="error" *ngIf="form.get('title')?.touched && form.get('title')?.invalid">
+          חובה למלא כותרת
+        </div>
+      </div>
+  
+      <div class="form-row">
+        <label for="description">תיאור</label>
+        <textarea id="description" rows="4" formControlName="description"></textarea>
+      </div>
+  
+      <div class="form-row">
+        <label for="requestUser">משתמש פותח *</label>
+        <input id="requestUser" type="text" formControlName="requestUser">
+        <div class="error" *ngIf="form.get('requestUser')?.touched && form.get('requestUser')?.invalid">
+          חובה למלא שם משתמש
+        </div>
+      </div>
+  
+      <div class="form-row">
+        <label for="callbackPhone">טלפון לחזרה *</label>
+        <input id="callbackPhone" type="text" formControlName="callbackPhone">
+        <div class="error" *ngIf="form.get('callbackPhone')?.touched && form.get('callbackPhone')?.invalid">
+          חובה למלא מספר טלפון
+        </div>
+      </div>
+  
+      <div class="form-row">
+        <label for="location">מיקום התקלה</label>
+        <input id="location" type="text" formControlName="location">
+      </div>
+  
+      <div class="form-row">
+        <label for="computerName">שם מחשב</label>
+        <input id="computerName" type="text" formControlName="computerName">
+      </div>
+  
+      <!-- בהמשך נוסיף כאן דרופדאונים לקטגוריות, סטטוס, עדיפות וכו' -->
+  
+      <div class="actions">
+        <button type="submit" [disabled]="form.invalid || isSubmitting">
+          {{ isSubmitting ? 'שולח...' : 'שמור קריאה' }}
+        </button>
+      </div>
+  
+      <div class="message success" *ngIf="successMessage">
+        {{ successMessage }}
+      </div>
+      <div class="message error" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+  
+    </form>
+  </div>
+  
