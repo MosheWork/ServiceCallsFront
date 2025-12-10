@@ -48,46 +48,113 @@
       <input id="computerName" type="text" formControlName="computerName">
     </div>
 
-    <!-- 🔻 קטגוריה ראשית -->
-    <div class="form-row">
-      <label for="mainCategoryID">קטגוריה ראשית *</label>
-      <select id="mainCategoryID"
-              formControlName="mainCategoryID"
-              (change)="onMainCategoryChange()">
-        <option [ngValue]="null">-- בחר --</option>
-        <option *ngFor="let mc of mainCategories" [ngValue]="mc.id">
-          {{ mc.name }}
-        </option>
-      </select>
-      <div class="error" *ngIf="form.get('mainCategoryID')?.touched && form.get('mainCategoryID')?.invalid">
-        חובה לבחור קטגוריה
-      </div>
-    </div>
+<!-- 🔻 קטגוריה ראשית -->
+<div class="form-row">
+  <label for="mainCategoryID">קטגוריה ראשית *</label>
 
-    <!-- 🔻 תת־קטגוריה 1 -->
-    <div class="form-row" *ngIf="subCategory1List && subCategory1List.length">
-      <label for="subCategory1ID">תת־קטגוריה 1</label>
-      <select id="subCategory1ID"
-              formControlName="subCategory1ID"
-              (change)="onSubCategory1Change()">
-        <option [ngValue]="null">-- בחר --</option>
-        <option *ngFor="let sc1 of subCategory1List" [ngValue]="sc1.id">
-          {{ sc1.name }}
-        </option>
-      </select>
-    </div>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-select
+      id="mainCategoryID"
+      formControlName="mainCategoryID"
+      (selectionChange)="onMainCategoryChange()">
 
-    <!-- 🔻 תת־קטגוריה 2 -->
-    <div class="form-row" *ngIf="subCategory2List && subCategory2List.length">
-      <label for="subCategory2ID">תת־קטגוריה 2</label>
-      <select id="subCategory2ID"
-              formControlName="subCategory2ID">
-        <option [ngValue]="null">-- בחר --</option>
-        <option *ngFor="let sc2 of subCategory2List" [ngValue]="sc2.id">
-          {{ sc2.name }}
-        </option>
-      </select>
-    </div>
+      <!-- search inside dropdown -->
+      <mat-option disabled>
+        <input
+          matInput
+          placeholder="חיפוש קטגוריה..."
+          [(ngModel)]="mainCategorySearch"
+          name="mainCategorySearch"
+          [ngModelOptions]="{ standalone: true }"
+          (click)="$event.stopPropagation()"
+          (keydown)="$event.stopPropagation()"
+        >
+      </mat-option>
+      
+      <mat-option
+        *ngFor="let mc of filteredMainCategories()"
+        [value]="mc.id">
+        {{ mc.name }}
+      </mat-option>
+      
+
+    </mat-select>
+
+    <mat-error *ngIf="form.get('mainCategoryID')?.touched && form.get('mainCategoryID')?.invalid">
+      חובה לבחור קטגוריה
+    </mat-error>
+  </mat-form-field>
+</div>
+
+<!-- 🔻 תת־קטגוריה 1 -->
+<div class="form-row" *ngIf="subCategory1List && subCategory1List.length">
+  <label for="subCategory1ID">תת־קטגוריה 1</label>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-select
+      id="subCategory1ID"
+      formControlName="subCategory1ID"
+      (selectionChange)="onSubCategory1Change()">
+
+      <!-- search inside dropdown -->
+      <mat-option disabled>
+        <input
+          matInput
+          placeholder="חיפוש תת־קטגוריה..."
+          [(ngModel)]="subCategory1Search"
+          name="subCategory1Search"
+          [ngModelOptions]="{ standalone: true }"
+          (click)="$event.stopPropagation()"
+          (keydown)="$event.stopPropagation()"
+        >
+      </mat-option>
+      
+      <mat-option
+        *ngFor="let sc1 of filteredSubCategory1()"
+        [value]="sc1.id">
+        {{ sc1.name }}
+      </mat-option>
+      
+
+    </mat-select>
+  </mat-form-field>
+</div>
+
+
+<!-- 🔻 תת־קטגוריה 2 -->
+<div class="form-row" *ngIf="subCategory2List && subCategory2List.length">
+  <label for="subCategory2ID">תת־קטגוריה 2</label>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-select
+      id="subCategory2ID"
+      formControlName="subCategory2ID">
+
+      <!-- search inside dropdown -->
+      <mat-option disabled>
+        <input
+          matInput
+          placeholder="חיפוש תת־קטגוריה..."
+          [(ngModel)]="subCategory2Search"
+          name="subCategory2Search"
+          [ngModelOptions]="{ standalone: true }"
+          (click)="$event.stopPropagation()"
+          (keydown)="$event.stopPropagation()"
+        >
+      </mat-option>
+      
+      <mat-option
+        *ngFor="let sc2 of filteredSubCategory2()"
+        [value]="sc2.id">
+        {{ sc2.name }}
+      </mat-option>
+      
+      
+
+    </mat-select>
+  </mat-form-field>
+</div>
+
 
     <!-- עדיפות (נשאר) -->
     <div class="form-row" *ngIf="priorities && priorities.length">

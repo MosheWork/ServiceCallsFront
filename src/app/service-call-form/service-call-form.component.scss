@@ -1,95 +1,145 @@
 .service-call-form {
-    max-width: 700px;
-    margin: 2rem auto;
-    padding: 1.5rem;
-    border-radius: 8px;
-    background: #f7f7f7;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-  
-    h1 {
-      margin-bottom: 1.5rem;
-      text-align: right;
-      font-size: 1.6rem;
-    }
-  
-    form {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-  
-    .form-row {
-      display: flex;
-      flex-direction: column;
-      text-align: right;
-  
-      label {
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-      }
-  
-      input,
-      textarea {
-        padding: 0.5rem 0.75rem;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-        font-size: 0.95rem;
-  
-        &:focus {
-          outline: none;
-          border-color: #1976d2;
-          box-shadow: 0 0 0 1px rgba(25, 118, 210, 0.25);
-        }
-      }
-  
-      textarea {
-        resize: vertical;
-        min-height: 80px;
-      }
-  
-      .error {
-        margin-top: 0.25rem;
-        color: #d32f2f;
-        font-size: 0.8rem;
-      }
-    }
-  
-    .actions {
-      display: flex;
-      justify-content: flex-start;
-  
-      button {
-        padding: 0.6rem 1.4rem;
-        font-size: 0.95rem;
-        border-radius: 4px;
-        border: none;
-        cursor: pointer;
-        background: #1976d2;
-        color: #fff;
-        transition: background 0.2s ease;
-  
-        &:disabled {
-          opacity: 0.6;
-          cursor: default;
-        }
-  
-        &:not(:disabled):hover {
-          background: #125a9c;
-        }
-      }
-    }
-  
-    .message {
-      margin-top: 0.75rem;
+  max-width: 720px;
+  margin: 2rem auto;
+  padding: 1.75rem 2rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f5f7ff 0%, #fdfefe 60%);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  border-inline-start: 4px solid #1976d2;
+
+  direction: rtl;
+  text-align: right;
+
+  h1 {
+    margin: 0 0 1.5rem 0;
+    text-align: right;
+    font-size: 1.7rem;
+    font-weight: 600;
+    color: #1a237e;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* שורה בטופס */
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+
+    label {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
       font-size: 0.9rem;
-  
-      &.success {
-        color: #2e7d32;
+      color: #37474f;
+    }
+
+    input,
+    textarea,
+    select {
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      border: 1px solid #cfd8dc;
+      font-size: 0.95rem;
+      background-color: #ffffff;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease,
+        background-color 0.15s ease;
+
+      &:focus {
+        outline: none;
+        border-color: #1976d2;
+        box-shadow: 0 0 0 1px rgba(25, 118, 210, 0.2);
+        background-color: #f9fbff;
       }
-  
-      &.error {
-        color: #d32f2f;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: linear-gradient(45deg, transparent 50%, #1976d2 50%),
+        linear-gradient(135deg, #1976d2 50%, transparent 50%);
+      background-position: calc(0.9rem) center, calc(0.5rem) center;
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+
+      /* ב-RTL החץ נמצא בצד שמאל – נעביר אותו */
+      padding-inline-end: 0.75rem;
+      padding-inline-start: 1.8rem;
+    }
+
+    .error {
+      margin-top: 0.25rem;
+      color: #d32f2f;
+      font-size: 0.8rem;
+    }
+  }
+
+  /* שורת כפתור */
+  .actions {
+    display: flex;
+    justify-content: flex-end; // כפתור בצד ימין במסך RTL
+    margin-top: 0.5rem;
+
+    button {
+      padding: 0.6rem 1.6rem;
+      font-size: 0.95rem;
+      border-radius: 20px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg, #1976d2, #1565c0);
+      color: #fff;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      transition: background 0.2s ease, transform 0.1s ease,
+        box-shadow 0.2s ease;
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: default;
+        box-shadow: none;
+      }
+
+      &:not(:disabled):hover {
+        background: linear-gradient(135deg, #1565c0, #0d47a1);
+        box-shadow: 0 3px 8px rgba(21, 101, 192, 0.35);
+        transform: translateY(-1px);
+      }
+
+      &:not(:disabled):active {
+        transform: translateY(0);
+        box-shadow: 0 2px 5px rgba(21, 101, 192, 0.3);
       }
     }
   }
-  
+
+  /* הודעות הצלחה/שגיאה מתחת לטופס */
+  .message {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+
+    &.success {
+      color: #2e7d32;
+    }
+
+    &.error {
+      color: #d32f2f;
+    }
+  }
+
+  /* רספונסיבי – במסכים קטנים קצת מצמצמים ריווח */
+  @media (max-width: 768px) {
+    padding: 1.25rem 1.25rem;
+
+    h1 {
+      font-size: 1.4rem;
+    }
+  }
+}
