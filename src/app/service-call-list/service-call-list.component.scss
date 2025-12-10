@@ -6,43 +6,63 @@
     max-width: 1300px;
     margin: 0 auto;
   
-    /* כרטיס כותרת עליון (h1) */
+    /* כותרת עליונה */
     .header-card {
       margin-bottom: 12px;
+      padding-inline: 20px;
+  
+      .header-main {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+  
+      .header-text {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        text-align: right;
+      }
   
       h1 {
         margin: 0;
-        text-align: right;
+        font-size: 24px;
+        font-weight: 600;
+      }
+  
+      .header-subtitle {
+        font-size: 14px;
+        color: #555;
+      }
+  
+      .new-count {
+        font-weight: 700;
+        color: #1976d2;
       }
     }
   
-    /* כרטיס פילטרים עליון (חיפוש חופשי וכו') */
     .filter-card {
       margin-bottom: 12px;
     }
   
-    /* שורת הפילטרים בכרטיס העליון */
     .filter-row {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       gap: 12px;
-      align-items: flex-end;
+      align-items: center;          // יישור כפתורים וחיפוש באותו קו
     }
   
-    /* כל שדה פילטר בכרטיס העליון */
     .filter-field {
-      min-width: 220px;
-      flex: 1 1 220px;
+      flex: 1 1 auto;              // החיפוש תופס את כל הרוחב
+      min-width: 260px;
     }
   
-    /* כפתורי "איפוס פילטרים" + "רענן" */
     .filter-buttons {
       display: flex;
       gap: 8px;
-      margin-right: auto; // ב־RTL דוחף את הכפתורים לשמאל
+      margin-right: auto; // ב-RTL דוחף לשמאל
     }
   
-    /* מצב טעינה – ספינר + טקסט */
     .loading-container {
       display: flex;
       flex-direction: column;
@@ -54,72 +74,127 @@
       }
     }
   
-    /* כרטיס שגיאה כאשר יש הודעת שגיאה */
     .error-card {
       margin-top: 16px;
       color: #b71c1c;
     }
   
-    /* מעטפת הטבלה – גלילה אופקית אם צריך */
     .table-container {
       overflow-x: auto;
     }
   
-    /* ============================
-       טבלת קריאות שירות
-       ============================ */
     table {
       width: 100%;
   
-      /* יישור טקסט לימין ושבירת שורה מנועה */
       th.mat-header-cell,
       td.mat-cell {
         text-align: right;
         white-space: nowrap;
       }
   
-      /* כותרת התא – מיושרת למעלה (לטובת הכותרת + האייקון) */
       th.mat-header-cell {
-        vertical-align: top;
+        vertical-align: top; // כותרת + אייקון
       }
   
-      /* שורה כאשר אין נתונים */
       .no-data-row td {
         text-align: center;
         font-style: italic;
       }
   
-      /* טקסט כותרת העמודה (למשל "קטגוריה", "סטטוס") */
       .header-title {
         font-weight: 500;
-        margin-bottom: 2px;
         font-size: 13px;
       }
   
-      /* עטיפה של הכותרת + אייקון הפילטר בתוך ה-th
-         כל האזור לוחיץ ופותח את ה-dropdown (mat-menu) */
       .header-filter-wrapper {
         display: flex;
-        flex-direction: row; // כותרת ואייקון באותה שורה
+        flex-direction: row;
         align-items: center;
         gap: 4px;
-        cursor: pointer;
         padding: 2px 0;
       }
   
-      /* אייקון פילטר בכותרת */
-      .header-filter-icon {
-        font-size: 20px;
-        color: rgba(0, 0, 0, 0.54); // צבע ברירת מחדל (אפור)
-        transition: color 0.2s ease;
+      .header-filter-button {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        padding: 0;
       }
   
-      /* כאשר יש פילטר פעיל – משנים את צבע האייקון (כחול, למשל) */
+      .header-filter-icon {
+        font-size: 18px;
+        opacity: 0.5;
+        transition: color 0.15s ease, opacity 0.15s ease;
+      }
+  
       .header-filter-icon.active-filter {
-        color: #0c7be9;
+        color: #1976d2;
+        opacity: 1;
       }
     }
   }
+  
+  .clickable-row {
+    cursor: pointer;
+  }
+  
+  .clickable-row:hover {
+    background: #f0f0f0;
+  }
+  
+  /* ======= עיצוב dropdown של הפילטר ======= */
+  
+  .filter-menu {
+    padding: 8px 12px;
+    max-height: 260px;
+    width: 240px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    background: #f5f7fb;
+    border-radius: 4px;
+  }
+  
+  .filter-menu-actions {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  
+  .filter-action-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    font-size: 12px;
+    padding-inline: 8px;
+    line-height: 24px;
+  }
+  
+  .filter-action-btn.reset {
+    border-color: #e53935;
+    color: #e53935;
+  }
+  
+  .filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .filter-options .mat-mdc-checkbox {
+    padding: 2px 4px;
+    border-radius: 4px;
+  }
+  
+  .filter-options .mat-mdc-checkbox:hover {
+    background-color: rgba(25, 118, 210, 0.08);
+  }
+  
+  .filter-options .mat-mdc-checkbox .mdc-label {
+    color: #1f2933;
+    font-size: 13px;
+  }
+  
   
   /* ============================
      שורות הטבלה – מצב hover
@@ -132,23 +207,78 @@
     background: #f0f0f0;
   }
   
-  /* ============================
-     תוכן ה-dropdown של הפילטר (mat-menu)
-     ============================ */
-  
-  /* מעטפת כללית של תפריט הפילטר – ריווח פנימי, גובה/רוחב */
-  .filter-menu {
-    padding: 8px 16px;
-    max-height: 260px;     // גובה מקסימלי – גלילה אם עובר
-    width: 220px;          // רוחב קבוע ונעים
-    box-sizing: border-box;
-    overflow-y: auto;      // גלילה אנכית אם יש הרבה ערכים
-  }
-  
-  /* רשימת ה-checkboxים בתוך הפילטר */
-  .filter-options {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;              // רווח קטן בין שורה לשורה
-  }
-  
+/* ============================
+   תוכן ה-dropdown של הפילטר (mat-menu)
+   ============================ */
+
+/* מעטפת כללית של תפריט הפילטר – רקע, ריווח, גלילה */
+.filter-menu {
+  padding: 8px 12px;
+  max-height: 260px;     // גובה מקסימלי – גלילה אם עובר
+  width: 240px;          // רוחב נעים
+  box-sizing: border-box;
+  overflow-y: auto;
+  background: #e9f8ff;   // רקע בהיר
+  border-radius: 4px;
+}
+
+/* שורה עליונה של הכפתורים בחר הכל / אפס סנן */
+.filter-menu-actions {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+/* שורה תחתונה של כפתור "שמור" */
+.filter-menu-save {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* כפתור שמור – קומפקטי ויפה */
+.filter-save-btn {
+  font-size: 12px;
+  padding-inline: 12px;
+  line-height: 26px;
+}
+
+/* כפתורי הפעולה בתוך ה-dropdown */
+.filter-action-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 12px;
+  padding-inline: 8px;
+  line-height: 24px;
+}
+
+/* כפתור "אפס סנן" – טיפה מודגש בצבע */
+.filter-action-btn.reset {
+  border-color: #e53935;
+  color: #e53935;
+}
+
+/* רשימת ה-checkboxים בתוך הפילטר */
+.filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* כל checkbox – padding קטן ו-hover נחמד */
+.filter-options .mat-mdc-checkbox {
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+/* צבע hover לשורה של פילטר */
+.filter-options .mat-mdc-checkbox:hover {
+  background-color: rgba(25, 118, 210, 0.08); // כחול עדין ב-hover
+}
+
+/* טקסט label בתוך ה-checkbox */
+.filter-options .mat-mdc-checkbox .mdc-label {
+  color: #1f2933;
+  font-size: 13px;
+}

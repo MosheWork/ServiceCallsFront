@@ -1,6 +1,15 @@
 <div class="service-call-list" dir="rtl">
+  <!-- ===== כותרת עליונה + קריאות חדשות ===== -->
   <mat-card class="header-card">
-    <h1>קריאות שירות</h1>
+    <div class="header-main">
+      <div class="header-text">
+        <h1>קריאות שירות</h1>
+        <div class="header-subtitle">
+          קריאות חדשות:
+          <span class="new-count">{{ newCallsCount }}</span>
+        </div>
+      </div>
+    </div>
   </mat-card>
 
   <!-- 🔍 Filter card -->
@@ -52,7 +61,7 @@
     <div class="table-container">
       <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z2">
 
-        <!-- # -->
+        <!-- # (ללא סורט) -->
         <ng-container matColumnDef="index">
           <th mat-header-cell *matHeaderCellDef>#</th>
           <td mat-cell *matCellDef="let row; let i = index">
@@ -60,170 +69,577 @@
           </td>
         </ng-container>
 
-        <!-- תאריך פתיחה -->
+        <!-- תאריך פתיחה + sort -->
         <ng-container matColumnDef="entryTime">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>תאריך פתיחה</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="entryTime">
+            תאריך פתיחה
+          </th>
           <td mat-cell *matCellDef="let row">
             {{ formatDate(row.entryTime) }}
           </td>
         </ng-container>
 
-        <!-- כותרת -->
+        <!-- כותרת + פילטר + sort -->
         <ng-container matColumnDef="title">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>כותרת</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="title">
+            <div class="header-filter-wrapper">
+              <span class="header-title">כותרת</span>
+
+              <button
+                mat-icon-button
+                class="header-filter-button"
+                [matMenuTriggerFor]="titleMenu"
+                (click)="$event.stopPropagation()">
+                <mat-icon
+                  class="header-filter-icon"
+                  [ngClass]="{ 'active-filter': selectedTitles.length > 0 }">
+                  filter_list
+                </mat-icon>
+              </button>
+            </div>
+
+            <mat-menu #titleMenu="matMenu" xPosition="before" [overlapTrigger]="false">
+              <div class="filter-menu">
+                <div class="filter-menu-actions">
+                  <button mat-stroked-button
+                          color="primary"
+                          class="filter-action-btn"
+                          (click)="selectAllTitles($event)">
+                    בחר הכל
+                  </button>
+                  <button mat-stroked-button
+                          color="warn"
+                          class="filter-action-btn reset"
+                          (click)="clearTitleFilter($event)">
+                    אפס סנן
+                  </button>
+                </div>
+
+                <mat-divider></mat-divider>
+
+                <div class="filter-options">
+                  <mat-checkbox
+                    *ngFor="let t of distinctTitles"
+                    [checked]="selectedTitles.includes(t)"
+                    (click)="$event.stopPropagation()"
+                    (change)="onTitleCheckboxChange($event.checked, t)">
+                    {{ t }}
+                  </mat-checkbox>
+                </div>
+              </div>
+            </mat-menu>
+          </th>
+
           <td mat-cell *matCellDef="let row">
             {{ row.title }}
           </td>
         </ng-container>
 
-        <!-- משתמש פותח -->
+        <!-- משתמש פותח + פילטר + sort -->
         <ng-container matColumnDef="requestUser">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>משתמש פותח</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="requestUser">
+            <div class="header-filter-wrapper">
+              <span class="header-title">משתמש פותח</span>
+
+              <button
+                mat-icon-button
+                class="header-filter-button"
+                [matMenuTriggerFor]="requestUserMenu"
+                (click)="$event.stopPropagation()">
+                <mat-icon
+                  class="header-filter-icon"
+                  [ngClass]="{ 'active-filter': selectedRequestUsers.length > 0 }">
+                  filter_list
+                </mat-icon>
+              </button>
+            </div>
+
+            <mat-menu #requestUserMenu="matMenu" xPosition="before" [overlapTrigger]="false">
+              <div class="filter-menu">
+                <div class="filter-menu-actions">
+                  <button mat-stroked-button
+                          color="primary"
+                          class="filter-action-btn"
+                          (click)="selectAllRequestUsers($event)">
+                    בחר הכל
+                  </button>
+                  <button mat-stroked-button
+                          color="warn"
+                          class="filter-action-btn reset"
+                          (click)="clearRequestUserFilter($event)">
+                    אפס סנן
+                  </button>
+                </div>
+
+                <mat-divider></mat-divider>
+
+                <div class="filter-options">
+                  <mat-checkbox
+                    *ngFor="let u of distinctRequestUsers"
+                    [checked]="selectedRequestUsers.includes(u)"
+                    (click)="$event.stopPropagation()"
+                    (change)="onRequestUserCheckboxChange($event.checked, u)">
+                    {{ u }}
+                  </mat-checkbox>
+                </div>
+              </div>
+            </mat-menu>
+          </th>
+
           <td mat-cell *matCellDef="let row">
             {{ row.requestUser }}
           </td>
         </ng-container>
 
-        <!-- טלפון -->
+        <!-- טלפון + פילטר + sort -->
         <ng-container matColumnDef="callbackPhone">
-          <th mat-header-cell *matHeaderCellDef>טלפון</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="callbackPhone">
+            <div class="header-filter-wrapper">
+              <span class="header-title">טלפון</span>
+
+              <button
+                mat-icon-button
+                class="header-filter-button"
+                [matMenuTriggerFor]="callbackPhoneMenu"
+                (click)="$event.stopPropagation()">
+                <mat-icon
+                  class="header-filter-icon"
+                  [ngClass]="{ 'active-filter': selectedCallbackPhones.length > 0 }">
+                  filter_list
+                </mat-icon>
+              </button>
+            </div>
+
+            <mat-menu #callbackPhoneMenu="matMenu" xPosition="before" [overlapTrigger]="false">
+              <div class="filter-menu">
+                <div class="filter-menu-actions">
+                  <button mat-stroked-button
+                          color="primary"
+                          class="filter-action-btn"
+                          (click)="selectAllCallbackPhones($event)">
+                    בחר הכל
+                  </button>
+                  <button mat-stroked-button
+                          color="warn"
+                          class="filter-action-btn reset"
+                          (click)="clearCallbackPhoneFilter($event)">
+                    אפס סנן
+                  </button>
+                </div>
+
+                <mat-divider></mat-divider>
+
+                <div class="filter-options">
+                  <mat-checkbox
+                    *ngFor="let p of distinctCallbackPhones"
+                    [checked]="selectedCallbackPhones.includes(p)"
+                    (click)="$event.stopPropagation()"
+                    (change)="onCallbackPhoneCheckboxChange($event.checked, p)">
+                    {{ p }}
+                  </mat-checkbox>
+                </div>
+              </div>
+            </mat-menu>
+          </th>
+
           <td mat-cell *matCellDef="let row">
             {{ row.callbackPhone }}
           </td>
         </ng-container>
 
-<!-- קטגוריה ראשית + פילטר -->
-<ng-container matColumnDef="mainCategoryName">
-  <th mat-header-cell *matHeaderCellDef>
+        <!-- קטגוריה ראשית + פילטר + sort -->
+        <ng-container matColumnDef="mainCategoryName">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="mainCategoryName">
+            <div class="header-filter-wrapper">
+              <span class="header-title">קטגוריה</span>
 
-    <!-- כותרת + אייקון באותה שורה -->
-    <div class="header-filter-wrapper"
-         [matMenuTriggerFor]="mainCategoryMenu"
-         (click)="$event.stopPropagation()">
+              <button
+                mat-icon-button
+                class="header-filter-button"
+                [matMenuTriggerFor]="mainCategoryMenu"
+                (click)="$event.stopPropagation()">
+                <mat-icon
+                  class="header-filter-icon"
+                  [ngClass]="{ 'active-filter': selectedMainCategories.length > 0 }">
+                  filter_list
+                </mat-icon>
+              </button>
+            </div>
 
-      <span class="header-title">קטגוריה</span>
+            <mat-menu #mainCategoryMenu="matMenu" xPosition="before" [overlapTrigger]="false">
+              <div class="filter-menu">
+                <div class="filter-menu-actions">
+                  <button mat-stroked-button
+                          color="primary"
+                          class="filter-action-btn"
+                          (click)="selectAllMainCategories($event)">
+                    בחר הכל
+                  </button>
+                  <button mat-stroked-button
+                          color="warn"
+                          class="filter-action-btn reset"
+                          (click)="clearMainCategoryFilter($event)">
+                    אפס סנן
+                  </button>
+                </div>
 
-      <!-- האייקון צובע את עצמו כשיש בחירה -->
-      <mat-icon
-        class="header-filter-icon"
-        [ngClass]="{ 'active-filter': selectedMainCategories.length > 0 }">
-        filter_list
-      </mat-icon>
+                <mat-divider></mat-divider>
 
-    </div>
+                <div class="filter-options">
+                  <mat-checkbox
+                    *ngFor="let m of distinctMainCategories"
+                    [checked]="selectedMainCategories.includes(m)"
+                    (click)="$event.stopPropagation()"
+                    (change)="onMainCategoryCheckboxChange($event.checked, m)">
+                    {{ m }}
+                  </mat-checkbox>
+                </div>
+              </div>
+            </mat-menu>
+          </th>
 
-    <!-- התפריט -->
-    <mat-menu
-      #mainCategoryMenu="matMenu"
-      xPosition="before"
-      [overlapTrigger]="false">
+          <td mat-cell *matCellDef="let row">
+            {{ row.mainCategoryName }}
+          </td>
+        </ng-container>
 
-      <div class="filter-menu">
-        <div class="filter-options">
-          <mat-checkbox
-            *ngFor="let m of distinctMainCategories"
-            [checked]="selectedMainCategories.includes(m)"
-            (change)="onMainCategoryCheckboxChange($event.checked, m)">
-            {{ m }}
-          </mat-checkbox>
-        </div>
-      </div>
-
-      <mat-divider></mat-divider>
-
-      <button mat-menu-item (click)="clearMainCategoryFilter()">
-        אפס סנן
-      </button>
-    </mat-menu>
-
-  </th>
-
-  <td mat-cell *matCellDef="let row">
-    {{ row.mainCategoryName }}
-  </td>
-</ng-container>
-
-        <!-- תת־קטגוריה 1 -->
+        <!-- תת־קטגוריה 1 + פילטר + sort -->
         <ng-container matColumnDef="subCategory1Name">
-          <th mat-header-cell *matHeaderCellDef>תת־קטגוריה 1</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="subCategory1Name">
+            <div class="header-filter-wrapper">
+              <span class="header-title">תת־קטגוריה 1</span>
+
+              <button
+                mat-icon-button
+                class="header-filter-button"
+                [matMenuTriggerFor]="subCategory1Menu"
+                (click)="$event.stopPropagation()">
+                <mat-icon
+                  class="header-filter-icon"
+                  [ngClass]="{ 'active-filter': selectedSubCategory1.length > 0 }">
+                  filter_list
+                </mat-icon>
+              </button>
+            </div>
+
+            <mat-menu #subCategory1Menu="matMenu" xPosition="before" [overlapTrigger]="false">
+              <div class="filter-menu">
+                <div class="filter-menu-actions">
+                  <button mat-stroked-button
+                          color="primary"
+                          class="filter-action-btn"
+                          (click)="selectAllSubCategory1($event)">
+                    בחר הכל
+                  </button>
+                  <button mat-stroked-button
+                          color="warn"
+                          class="filter-action-btn reset"
+                          (click)="clearSubCategory1Filter($event)">
+                    אפס סנן
+                  </button>
+                </div>
+
+                <mat-divider></mat-divider>
+
+                <div class="filter-options">
+                  <mat-checkbox
+                    *ngFor="let s1 of distinctSubCategory1"
+                    [checked]="selectedSubCategory1.includes(s1)"
+                    (click)="$event.stopPropagation()"
+                    (change)="onSubCategory1CheckboxChange($event.checked, s1)">
+                    {{ s1 }}
+                  </mat-checkbox>
+                </div>
+              </div>
+            </mat-menu>
+          </th>
+
           <td mat-cell *matCellDef="let row">
             {{ row.subCategory1Name }}
           </td>
         </ng-container>
 
-        <!-- תת־קטגוריה 2 -->
+        <!-- תת־קטגוריה 2 + פילטר + sort -->
         <ng-container matColumnDef="subCategory2Name">
-          <th mat-header-cell *matHeaderCellDef>תת־קטגוריה 2</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="subCategory2Name">
+            <div class="header-filter-wrapper">
+              <span class="header-title">תת־קטגוריה 2</span>
+
+              <button
+                mat-icon-button
+                class="header-filter-button"
+                [matMenuTriggerFor]="subCategory2Menu"
+                (click)="$event.stopPropagation()">
+                <mat-icon
+                  class="header-filter-icon"
+                  [ngClass]="{ 'active-filter': selectedSubCategory2.length > 0 }">
+                  filter_list
+                </mat-icon>
+              </button>
+            </div>
+
+            <mat-menu #subCategory2Menu="matMenu" xPosition="before" [overlapTrigger]="false">
+              <div class="filter-menu">
+                <div class="filter-menu-actions">
+                  <button mat-stroked-button
+                          color="primary"
+                          class="filter-action-btn"
+                          (click)="selectAllSubCategory2($event)">
+                    בחר הכל
+                  </button>
+                  <button mat-stroked-button
+                          color="warn"
+                          class="filter-action-btn reset"
+                          (click)="clearSubCategory2Filter($event)">
+                    אפס סנן
+                  </button>
+                </div>
+
+                <mat-divider></mat-divider>
+
+                <div class="filter-options">
+                  <mat-checkbox
+                    *ngFor="let s2 of distinctSubCategory2"
+                    [checked]="selectedSubCategory2.includes(s2)"
+                    (click)="$event.stopPropagation()"
+                    (change)="onSubCategory2CheckboxChange($event.checked, s2)">
+                    {{ s2 }}
+                  </mat-checkbox>
+                </div>
+              </div>
+            </mat-menu>
+          </th>
+
           <td mat-cell *matCellDef="let row">
             {{ row.subCategory2Name }}
           </td>
         </ng-container>
 
-<!-- סטטוס + פילטר -->
-<ng-container matColumnDef="statusName">
-  <th mat-header-cell *matHeaderCellDef>
+        <!-- סטטוס + פילטר + sort -->
+        <ng-container matColumnDef="statusName">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="statusName">
+            <div class="header-filter-wrapper">
+              <span class="header-title">סטטוס</span>
 
-    <div class="header-filter-wrapper"
-         [matMenuTriggerFor]="statusMenu"
-         (click)="$event.stopPropagation()">
+              <button
+                mat-icon-button
+                class="header-filter-button"
+                [matMenuTriggerFor]="statusMenu"
+                (click)="$event.stopPropagation()">
+                <mat-icon
+                  class="header-filter-icon"
+                  [ngClass]="{ 'active-filter': selectedStatuses.length > 0 }">
+                  filter_list
+                </mat-icon>
+              </button>
+            </div>
 
-      <span class="header-title">סטטוס</span>
-      <mat-icon class="header-filter-icon">filter_list</mat-icon>
+            <mat-menu #statusMenu="matMenu" xPosition="before" [overlapTrigger]="false">
+              <div class="filter-menu">
+                <div class="filter-menu-actions">
+                  <button mat-stroked-button
+                          color="primary"
+                          class="filter-action-btn"
+                          (click)="selectAllStatuses($event)">
+                    בחר הכל
+                  </button>
+                  <button mat-stroked-button
+                          color="warn"
+                          class="filter-action-btn reset"
+                          (click)="clearStatusFilter($event)">
+                    אפס סנן
+                  </button>
+                </div>
 
-    </div>
+                <mat-divider></mat-divider>
 
-    <mat-menu #statusMenu="matMenu" xPosition="before">
-      <div class="filter-menu">
-        <div class="filter-options">
-          <mat-checkbox
-            *ngFor="let s of distinctStatuses"
-            [checked]="selectedStatuses.includes(s)"
-            (change)="onStatusCheckboxChange($event.checked, s)">
-            {{ s }}
-          </mat-checkbox>
-        </div>
-      </div>
+                <div class="filter-options">
+                  <mat-checkbox
+                    *ngFor="let s of distinctStatuses"
+                    [checked]="selectedStatuses.includes(s)"
+                    (click)="$event.stopPropagation()"
+                    (change)="onStatusCheckboxChange($event.checked, s)">
+                    {{ s }}
+                  </mat-checkbox>
+                </div>
+              </div>
+            </mat-menu>
+          </th>
 
-      <mat-divider></mat-divider>
+          <td mat-cell *matCellDef="let row">
+            {{ row.statusName }}
+          </td>
+        </ng-container>
 
-      <button mat-menu-item (click)="clearStatusFilter()">
-        אפס סנן
-      </button>
-    </mat-menu>
-
-  </th>
-
-  <td mat-cell *matCellDef="let row">
-    {{ row.statusName }}
-  </td>
-</ng-container>
-
-
-
-        <!-- עדיפות -->
+        <!-- עדיפות + פילטר + sort -->
         <ng-container matColumnDef="priorityName">
-          <th mat-header-cell *matHeaderCellDef>עדיפות</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="priorityName">
+            <div class="header-filter-wrapper">
+              <span class="header-title">עדיפות</span>
+
+              <button
+                mat-icon-button
+                class="header-filter-button"
+                [matMenuTriggerFor]="priorityMenu"
+                (click)="$event.stopPropagation()">
+                <mat-icon
+                  class="header-filter-icon"
+                  [ngClass]="{ 'active-filter': selectedPriorities.length > 0 }">
+                  filter_list
+                </mat-icon>
+              </button>
+            </div>
+
+            <mat-menu #priorityMenu="matMenu" xPosition="before" [overlapTrigger]="false">
+              <div class="filter-menu">
+                <div class="filter-menu-actions">
+                  <button mat-stroked-button
+                          color="primary"
+                          class="filter-action-btn"
+                          (click)="selectAllPriorities($event)">
+                    בחר הכל
+                  </button>
+                  <button mat-stroked-button
+                          color="warn"
+                          class="filter-action-btn reset"
+                          (click)="clearPriorityFilter($event)">
+                    אפס סנן
+                  </button>
+                </div>
+
+                <mat-divider></mat-divider>
+
+                <div class="filter-options">
+                  <mat-checkbox
+                    *ngFor="let p of distinctPriorities"
+                    [checked]="selectedPriorities.includes(p)"
+                    (click)="$event.stopPropagation()"
+                    (change)="onPriorityCheckboxChange($event.checked, p)">
+                    {{ p }}
+                  </mat-checkbox>
+                </div>
+              </div>
+            </mat-menu>
+          </th>
+
           <td mat-cell *matCellDef="let row">
             {{ row.priorityName }}
           </td>
         </ng-container>
 
-        <!-- צוות מטפל -->
+        <!-- צוות מטפל + פילטר + sort -->
         <ng-container matColumnDef="teamInChargeName">
-          <th mat-header-cell *matHeaderCellDef>צוות מטפל</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="teamInChargeName">
+            <div class="header-filter-wrapper">
+              <span class="header-title">צוות מטפל</span>
+
+              <button
+                mat-icon-button
+                class="header-filter-button"
+                [matMenuTriggerFor]="teamMenu"
+                (click)="$event.stopPropagation()">
+                <mat-icon
+                  class="header-filter-icon"
+                  [ngClass]="{ 'active-filter': selectedTeams.length > 0 }">
+                  filter_list
+                </mat-icon>
+              </button>
+            </div>
+
+            <mat-menu #teamMenu="matMenu" xPosition="before" [overlapTrigger]="false">
+              <div class="filter-menu">
+                <div class="filter-menu-actions">
+                  <button mat-stroked-button
+                          color="primary"
+                          class="filter-action-btn"
+                          (click)="selectAllTeams($event)">
+                    בחר הכל
+                  </button>
+                  <button mat-stroked-button
+                          color="warn"
+                          class="filter-action-btn reset"
+                          (click)="clearTeamFilter($event)">
+                    אפס סנן
+                  </button>
+                </div>
+
+                <mat-divider></mat-divider>
+
+                <div class="filter-options">
+                  <mat-checkbox
+                    *ngFor="let t of distinctTeams"
+                    [checked]="selectedTeams.includes(t)"
+                    (click)="$event.stopPropagation()"
+                    (change)="onTeamCheckboxChange($event.checked, t)">
+                    {{ t }}
+                  </mat-checkbox>
+                </div>
+              </div>
+            </mat-menu>
+          </th>
+
           <td mat-cell *matCellDef="let row">
             {{ row.teamInChargeName }}
           </td>
         </ng-container>
 
-        <!-- משתמש מטפל -->
+        <!-- משתמש מטפל + פילטר + sort -->
         <ng-container matColumnDef="userInChargeName">
-          <th mat-header-cell *matHeaderCellDef>משתמש מטפל</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header="userInChargeName">
+            <div class="header-filter-wrapper">
+              <span class="header-title">משתמש מטפל</span>
+
+              <button
+                mat-icon-button
+                class="header-filter-button"
+                [matMenuTriggerFor]="userInChargeMenu"
+                (click)="$event.stopPropagation()">
+                <mat-icon
+                  class="header-filter-icon"
+                  [ngClass]="{ 'active-filter': selectedUsersInCharge.length > 0 }">
+                  filter_list
+                </mat-icon>
+              </button>
+            </div>
+
+            <mat-menu #userInChargeMenu="matMenu" xPosition="before" [overlapTrigger]="false">
+              <div class="filter-menu">
+                <div class="filter-menu-actions">
+                  <button mat-stroked-button
+                          color="primary"
+                          class="filter-action-btn"
+                          (click)="selectAllUsersInCharge($event)">
+                    בחר הכל
+                  </button>
+                  <button mat-stroked-button
+                          color="warn"
+                          class="filter-action-btn reset"
+                          (click)="clearUserInChargeFilter($event)">
+                    אפס סנן
+                  </button>
+                </div>
+
+                <mat-divider></mat-divider>
+
+                <div class="filter-options">
+                  <mat-checkbox
+                    *ngFor="let u of distinctUsersInCharge"
+                    [checked]="selectedUsersInCharge.includes(u)"
+                    (click)="$event.stopPropagation()"
+                    (change)="onUserInChargeCheckboxChange($event.checked, u)">
+                    {{ u }}
+                  </mat-checkbox>
+                </div>
+              </div>
+            </mat-menu>
+          </th>
+
           <td mat-cell *matCellDef="let row">
             {{ row.userInChargeName }}
           </td>
         </ng-container>
 
+        <!-- שורות -->
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
 
         <tr mat-row

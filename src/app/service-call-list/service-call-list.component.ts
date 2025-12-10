@@ -7,8 +7,10 @@ import { MatSort } from '@angular/material/sort';
 import { Router } from '@angular/router';
 
 export interface ServiceCallFullModel {
+  
   serviceCallID: number;
   entryTime: string | null;
+
   title: string | null;
   description: string | null;
   requestUser: string | null;
@@ -28,12 +30,11 @@ export interface ServiceCallFullModel {
   teamInChargeName: string | null;
   userInChargeName: string | null;
 
-  // 🔹 NEW
+  // יש לך גם IdNo אם תרצה בעתיד עמודה נפרדת
   userInChargeIdNo: string | null;
 
   serviceRequestTypeName: string | null;
 }
-
 
 @Component({
   selector: 'app-service-call-list',
@@ -59,38 +60,63 @@ export class ServiceCallListComponent implements OnInit {
 
   dataSource = new MatTableDataSource<ServiceCallFullModel>([]);
   allCalls: ServiceCallFullModel[] = [];
+  newCallsCount = 0; 
 
   isLoading = false;
   errorMessage = '';
 
+  // 🔎 חיפוש חופשי
   searchText = '';
-  selectedStatuses: string[] = [];
-  selectedMainCategories: string[] = [];
 
-  distinctStatuses: string[] = [];
+  // 🔽 מערכי בחירה לכל עמודה (multi-select)
+  selectedTitles: string[] = [];
+  selectedRequestUsers: string[] = [];
+  selectedCallbackPhones: string[] = [];
+  selectedMainCategories: string[] = [];
+  selectedSubCategory1: string[] = [];
+  selectedSubCategory2: string[] = [];
+  selectedStatuses: string[] = [];
+  selectedPriorities: string[] = [];
+  selectedTeams: string[] = [];
+  selectedUsersInCharge: string[] = [];
+
+  // 🔽 ערכים אפשריים לכל עמודה (distinct lists)
+  distinctTitles: string[] = [];
+  distinctRequestUsers: string[] = [];
+  distinctCallbackPhones: string[] = [];
   distinctMainCategories: string[] = [];
+  distinctSubCategory1: string[] = [];
+  distinctSubCategory2: string[] = [];
+  distinctStatuses: string[] = [];
+  distinctPriorities: string[] = [];
+  distinctTeams: string[] = [];
+  distinctUsersInCharge: string[] = [];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private http: HttpClient,    private router: Router,
-    ) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
   }
-
   loadData(): void {
     this.isLoading = true;
     this.errorMessage = '';
-
+  
     this.http.get<ServiceCallFullModel[]>(`${environment.apiBaseUrl}/api/ServiceCalls/Full`)
       .subscribe({
         next: data => {
           this.allCalls = data || [];
+  
+          // 🔹 ספירת קריאות חדשות (סטטוס = "חדש")
+          this.newCallsCount = this.allCalls.filter(c => c.statusName === 'חדש').length;
+  
           this.buildFilterLists();
-          this.applyFilter();    // ימלא את dataSource.data
-
+          this.applyFilter();
           this.isLoading = false;
         },
         error: err => {
@@ -100,33 +126,54 @@ export class ServiceCallListComponent implements OnInit {
         }
       });
   }
+  
 
+  /** בונה רשימות distinct לכל עמודה */
   buildFilterLists(): void {
+    const titleSet = new Set<string>();
+    const requestUserSet = new Set<string>();
+    const callbackPhoneSet = new Set<string>();
+    const mainCatSet = new Set<string>();
+    const subCat1Set = new Set<string>();
+    const subCat2Set = new Set<string>();
     const statusSet = new Set<string>();
-    const mainSet = new Set<string>();
+    const prioritySet = new Set<string>();
+    const teamSet = new Set<string>();
+    const userInChargeSet = new Set<string>();
 
     this.allCalls.forEach(c => {
-      if (c.statusName) {
-        statusSet.add(c.statusName);
-      }
-      if (c.mainCategoryName) {
-        mainSet.add(c.mainCategoryName);
-      }
+      if (c.title)                { titleSet.add(c.title); }
+      if (c.requestUser)          { requestUserSet.add(c.requestUser); }
+      if (c.callbackPhone)        { callbackPhoneSet.add(c.callbackPhone); }
+      if (c.mainCategoryName)     { mainCatSet.add(c.mainCategoryName); }
+      if (c.subCategory1Name)     { subCat1Set.add(c.subCategory1Name); }
+      if (c.subCategory2Name)     { subCat2Set.add(c.subCategory2Name); }
+      if (c.statusName)           { statusSet.add(c.statusName); }
+      if (c.priorityName)         { prioritySet.add(c.priorityName); }
+      if (c.teamInChargeName)     { teamSet.add(c.teamInChargeName); }
+      if (c.userInChargeName)     { userInChargeSet.add(c.userInChargeName); }
     });
 
-    this.distinctStatuses = Array.from(statusSet).sort();
-    this.distinctMainCategories = Array.from(mainSet).sort();
+    this.distinctTitles          = Array.from(titleSet).sort();
+    this.distinctRequestUsers    = Array.from(requestUserSet).sort();
+    this.distinctCallbackPhones  = Array.from(callbackPhoneSet).sort();
+    this.distinctMainCategories  = Array.from(mainCatSet).sort();
+    this.distinctSubCategory1    = Array.from(subCat1Set).sort();
+    this.distinctSubCategory2    = Array.from(subCat2Set).sort();
+    this.distinctStatuses        = Array.from(statusSet).sort();
+    this.distinctPriorities      = Array.from(prioritySet).sort();
+    this.distinctTeams           = Array.from(teamSet).sort();
+    this.distinctUsersInCharge   = Array.from(userInChargeSet).sort();
   }
 
+  /** מיישם את כל הפילטרים ביחד */
   applyFilter(): void {
     const text = (this.searchText || '').toLowerCase();
-    const statuses = this.selectedStatuses;
-    const mainCats = this.selectedMainCategories;
-  
+
     const filtered = this.allCalls.filter(c => {
       let ok = true;
-  
-      // חיפוש חופשי
+
+      // 🔍 חיפוש חופשי על טקסט כללי
       if (text) {
         const blob = [
           c.title,
@@ -135,33 +182,77 @@ export class ServiceCallListComponent implements OnInit {
           c.computerName,
           c.location
         ].join(' ').toLowerCase();
-  
+
         if (!blob.includes(text)) {
           ok = false;
         }
       }
-  
-      // 🔹 סטטוסים – ריבוי בחירה
-      if (ok && statuses.length) {
-        const s = c.statusName || '';
-        if (!statuses.includes(s)) {
-          ok = false;
-        }
+
+      // כותרת
+      if (ok && this.selectedTitles.length) {
+        const v = c.title || '';
+        if (!this.selectedTitles.includes(v)) ok = false;
       }
-  
-      // 🔹 קטגוריה ראשית – ריבוי בחירה
-      if (ok && mainCats.length) {
-        const m = c.mainCategoryName || '';
-        if (!mainCats.includes(m)) {
-          ok = false;
-        }
+
+      // משתמש פותח
+      if (ok && this.selectedRequestUsers.length) {
+        const v = c.requestUser || '';
+        if (!this.selectedRequestUsers.includes(v)) ok = false;
       }
-  
+
+      // טלפון
+      if (ok && this.selectedCallbackPhones.length) {
+        const v = c.callbackPhone || '';
+        if (!this.selectedCallbackPhones.includes(v)) ok = false;
+      }
+
+      // קטגוריה ראשית
+      if (ok && this.selectedMainCategories.length) {
+        const v = c.mainCategoryName || '';
+        if (!this.selectedMainCategories.includes(v)) ok = false;
+      }
+
+      // תת־קטגוריה 1
+      if (ok && this.selectedSubCategory1.length) {
+        const v = c.subCategory1Name || '';
+        if (!this.selectedSubCategory1.includes(v)) ok = false;
+      }
+
+      // תת־קטגוריה 2
+      if (ok && this.selectedSubCategory2.length) {
+        const v = c.subCategory2Name || '';
+        if (!this.selectedSubCategory2.includes(v)) ok = false;
+      }
+
+      // סטטוס
+      if (ok && this.selectedStatuses.length) {
+        const v = c.statusName || '';
+        if (!this.selectedStatuses.includes(v)) ok = false;
+      }
+
+      // עדיפות
+      if (ok && this.selectedPriorities.length) {
+        const v = c.priorityName || '';
+        if (!this.selectedPriorities.includes(v)) ok = false;
+      }
+
+      // צוות מטפל
+      if (ok && this.selectedTeams.length) {
+        const v = c.teamInChargeName || '';
+        if (!this.selectedTeams.includes(v)) ok = false;
+      }
+
+      // משתמש מטפל
+      if (ok && this.selectedUsersInCharge.length) {
+        const v = c.userInChargeName || '';
+        if (!this.selectedUsersInCharge.includes(v)) ok = false;
+      }
+
       return ok;
     });
-  
+
     this.dataSource.data = filtered;
-  
+
     if (this.paginator) {
       this.dataSource.paginator = this.paginator;
     }
@@ -169,91 +260,204 @@ export class ServiceCallListComponent implements OnInit {
       this.dataSource.sort = this.sort;
     }
   }
-  
-  
-  // איפוס כל הפילטרים
+
+  /** איפוס כל הפילטרים */
   clearFilters(): void {
     this.searchText = '';
-    this.selectedStatuses = [];       // 🔹 ריק = אין סינון לפי סטטוס
+
+    this.selectedTitles = [];
+    this.selectedRequestUsers = [];
+    this.selectedCallbackPhones = [];
     this.selectedMainCategories = [];
-    this.applyFilter();
-  }
-  
-  // איפוס רק סטטוס (בשביל "אפס סנן" בתוך הדרופדאון)
-  clearStatusFilter(): void {
+    this.selectedSubCategory1 = [];
+    this.selectedSubCategory2 = [];
     this.selectedStatuses = [];
+    this.selectedPriorities = [];
+    this.selectedTeams = [];
+    this.selectedUsersInCharge = [];
+
     this.applyFilter();
   }
-  
- 
 
   formatDate(dateStr: string | null): string {
-    if (!dateStr) {
-      return '';
-    }
+    if (!dateStr) return '';
     const d = new Date(dateStr);
-    if (isNaN(d.getTime())) {
-      return dateStr;
-    }
+    if (isNaN(d.getTime())) return dateStr;
     const pad = (n: number) => (n < 10 ? '0' + n : '' + n);
     return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
   openDetails(row: ServiceCallFullModel) {
-    // Full model has ServiceCallID
     this.router.navigate(['/service-calls', row.serviceCallID]);
   }
 
-  onStatusCheckboxChange(checked: boolean, value: string): void {
-    if (checked) {
-      if (!this.selectedStatuses.includes(value)) {
-        this.selectedStatuses = [...this.selectedStatuses, value];
-      }
-    } else {
-      this.selectedStatuses = this.selectedStatuses.filter(s => s !== value);
-    }
-    this.applyFilter();
-  }
-  
-  onMainCategoryCheckboxChange(checked: boolean, value: string): void {
-    if (checked) {
-      if (!this.selectedMainCategories.includes(value)) {
-        this.selectedMainCategories = [...this.selectedMainCategories, value];
-      }
-    } else {
-      this.selectedMainCategories = this.selectedMainCategories.filter(m => m !== value);
-    }
-    this.applyFilter();
-  }
-  
+  // ======== handlers לכל עמודה – checkbox change + בחר הכל + אפס סנן ========
 
-  clearMainCategoryFilter(): void {
+  private toggleInArray(checked: boolean, value: string, arr: string[]): string[] {
+    if (checked) {
+      return arr.includes(value) ? arr : [...arr, value];
+    } else {
+      return arr.filter(v => v !== value);
+    }
+  }
+
+  // כותרת
+  onTitleCheckboxChange(checked: boolean, value: string): void {
+    this.selectedTitles = this.toggleInArray(checked, value, this.selectedTitles);
+    this.applyFilter();
+  }
+  selectAllTitles(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.selectedTitles = [...this.distinctTitles];
+    this.applyFilter();
+  }
+  clearTitleFilter(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.selectedTitles = [];
+    this.applyFilter();
+  }
+
+  // משתמש פותח
+  onRequestUserCheckboxChange(checked: boolean, value: string): void {
+    this.selectedRequestUsers = this.toggleInArray(checked, value, this.selectedRequestUsers);
+    this.applyFilter();
+  }
+  selectAllRequestUsers(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.selectedRequestUsers = [...this.distinctRequestUsers];
+    this.applyFilter();
+  }
+  clearRequestUserFilter(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.selectedRequestUsers = [];
+    this.applyFilter();
+  }
+
+  // טלפון
+  onCallbackPhoneCheckboxChange(checked: boolean, value: string): void {
+    this.selectedCallbackPhones = this.toggleInArray(checked, value, this.selectedCallbackPhones);
+    this.applyFilter();
+  }
+  selectAllCallbackPhones(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.selectedCallbackPhones = [...this.distinctCallbackPhones];
+    this.applyFilter();
+  }
+  clearCallbackPhoneFilter(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.selectedCallbackPhones = [];
+    this.applyFilter();
+  }
+
+  // קטגוריה ראשית
+  onMainCategoryCheckboxChange(checked: boolean, value: string): void {
+    this.selectedMainCategories = this.toggleInArray(checked, value, this.selectedMainCategories);
+    this.applyFilter();
+  }
+  selectAllMainCategories(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.selectedMainCategories = [...this.distinctMainCategories];
+    this.applyFilter();
+  }
+  clearMainCategoryFilter(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
     this.selectedMainCategories = [];
     this.applyFilter();
   }
-  
-  
-  onStatusSelectionChange(values: (string | null)[]) {
-    // כאן מתעדכן אוטומטית דרך [(ngModel)], אנחנו רק דואגים שאין null
-    this.selectedStatuses = (values || []).filter(v => v !== null) as string[];
+
+  // תת־קטגוריה 1
+  onSubCategory1CheckboxChange(checked: boolean, value: string): void {
+    this.selectedSubCategory1 = this.toggleInArray(checked, value, this.selectedSubCategory1);
     this.applyFilter();
   }
-  
-  onMainCategorySelectionChange(values: (string | null)[]) {
-    this.selectedMainCategories = (values || []).filter(v => v !== null) as string[];
+  selectAllSubCategory1(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.selectedSubCategory1 = [...this.distinctSubCategory1];
+    this.applyFilter();
+  }
+  clearSubCategory1Filter(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.selectedSubCategory1 = [];
     this.applyFilter();
   }
 
-  onStatusResetClick(event: MouseEvent) {
-    event.stopPropagation();         // שלא ייסגר וייפתח שוב
+  // תת־קטגוריה 2
+  onSubCategory2CheckboxChange(checked: boolean, value: string): void {
+    this.selectedSubCategory2 = this.toggleInArray(checked, value, this.selectedSubCategory2);
+    this.applyFilter();
+  }
+  selectAllSubCategory2(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.selectedSubCategory2 = [...this.distinctSubCategory2];
+    this.applyFilter();
+  }
+  clearSubCategory2Filter(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.selectedSubCategory2 = [];
+    this.applyFilter();
+  }
+
+  // סטטוס
+  onStatusCheckboxChange(checked: boolean, value: string): void {
+    this.selectedStatuses = this.toggleInArray(checked, value, this.selectedStatuses);
+    this.applyFilter();
+  }
+  selectAllStatuses(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.selectedStatuses = [...this.distinctStatuses];
+    this.applyFilter();
+  }
+  clearStatusFilter(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
     this.selectedStatuses = [];
     this.applyFilter();
   }
-  
-  onMainCategoryResetClick(event: MouseEvent) {
-    event.stopPropagation();
-    this.selectedMainCategories = [];
+
+  // עדיפות
+  onPriorityCheckboxChange(checked: boolean, value: string): void {
+    this.selectedPriorities = this.toggleInArray(checked, value, this.selectedPriorities);
     this.applyFilter();
   }
-  
+  selectAllPriorities(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.selectedPriorities = [...this.distinctPriorities];
+    this.applyFilter();
+  }
+  clearPriorityFilter(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.selectedPriorities = [];
+    this.applyFilter();
+  }
+
+  // צוות מטפל
+  onTeamCheckboxChange(checked: boolean, value: string): void {
+    this.selectedTeams = this.toggleInArray(checked, value, this.selectedTeams);
+    this.applyFilter();
+  }
+  selectAllTeams(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.selectedTeams = [...this.distinctTeams];
+    this.applyFilter();
+  }
+  clearTeamFilter(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.selectedTeams = [];
+    this.applyFilter();
+  }
+
+  // משתמש מטפל
+  onUserInChargeCheckboxChange(checked: boolean, value: string): void {
+    this.selectedUsersInCharge = this.toggleInArray(checked, value, this.selectedUsersInCharge);
+    this.applyFilter();
+  }
+  selectAllUsersInCharge(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.selectedUsersInCharge = [...this.distinctUsersInCharge];
+    this.applyFilter();
+  }
+  clearUserInChargeFilter(event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+    this.selectedUsersInCharge = [];
+    this.applyFilter();
+  }
 }
