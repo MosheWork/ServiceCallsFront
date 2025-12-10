@@ -1,120 +1,154 @@
-.service-call-list {
-  padding: 16px;
-  max-width: 1300px;
-  margin: 0 auto;
-
-  .header-card {
-    margin-bottom: 12px;
-
-    h1 {
-      margin: 0;
-      text-align: right;
+/* ============================
+   מעטפת כללית למסך קריאות שירות
+   ============================ */
+   .service-call-list {
+    padding: 16px;
+    max-width: 1300px;
+    margin: 0 auto;
+  
+    /* כרטיס כותרת עליון (h1) */
+    .header-card {
+      margin-bottom: 12px;
+  
+      h1 {
+        margin: 0;
+        text-align: right;
+      }
+    }
+  
+    /* כרטיס פילטרים עליון (חיפוש חופשי וכו') */
+    .filter-card {
+      margin-bottom: 12px;
+    }
+  
+    /* שורת הפילטרים בכרטיס העליון */
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: flex-end;
+    }
+  
+    /* כל שדה פילטר בכרטיס העליון */
+    .filter-field {
+      min-width: 220px;
+      flex: 1 1 220px;
+    }
+  
+    /* כפתורי "איפוס פילטרים" + "רענן" */
+    .filter-buttons {
+      display: flex;
+      gap: 8px;
+      margin-right: auto; // ב־RTL דוחף את הכפתורים לשמאל
+    }
+  
+    /* מצב טעינה – ספינר + טקסט */
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 24px;
+  
+      .loading-text {
+        margin-top: 8px;
+      }
+    }
+  
+    /* כרטיס שגיאה כאשר יש הודעת שגיאה */
+    .error-card {
+      margin-top: 16px;
+      color: #b71c1c;
+    }
+  
+    /* מעטפת הטבלה – גלילה אופקית אם צריך */
+    .table-container {
+      overflow-x: auto;
+    }
+  
+    /* ============================
+       טבלת קריאות שירות
+       ============================ */
+    table {
+      width: 100%;
+  
+      /* יישור טקסט לימין ושבירת שורה מנועה */
+      th.mat-header-cell,
+      td.mat-cell {
+        text-align: right;
+        white-space: nowrap;
+      }
+  
+      /* כותרת התא – מיושרת למעלה (לטובת הכותרת + האייקון) */
+      th.mat-header-cell {
+        vertical-align: top;
+      }
+  
+      /* שורה כאשר אין נתונים */
+      .no-data-row td {
+        text-align: center;
+        font-style: italic;
+      }
+  
+      /* טקסט כותרת העמודה (למשל "קטגוריה", "סטטוס") */
+      .header-title {
+        font-weight: 500;
+        margin-bottom: 2px;
+        font-size: 13px;
+      }
+  
+      /* עטיפה של הכותרת + אייקון הפילטר בתוך ה-th
+         כל האזור לוחיץ ופותח את ה-dropdown (mat-menu) */
+      .header-filter-wrapper {
+        display: flex;
+        flex-direction: row; // כותרת ואייקון באותה שורה
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        padding: 2px 0;
+      }
+  
+      /* אייקון פילטר בכותרת */
+      .header-filter-icon {
+        font-size: 20px;
+        color: rgba(0, 0, 0, 0.54); // צבע ברירת מחדל (אפור)
+        transition: color 0.2s ease;
+      }
+  
+      /* כאשר יש פילטר פעיל – משנים את צבע האייקון (כחול, למשל) */
+      .header-filter-icon.active-filter {
+        color: #0c7be9;
+      }
     }
   }
-
-  .filter-card {
-    margin-bottom: 12px;
+  
+  /* ============================
+     שורות הטבלה – מצב hover
+     ============================ */
+  .clickable-row {
+    cursor: pointer;
   }
-
-  .filter-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    align-items: flex-end;
+  
+  .clickable-row:hover {
+    background: #f0f0f0;
   }
-
-  .filter-field {
-    min-width: 220px;
-    flex: 1 1 220px;
+  
+  /* ============================
+     תוכן ה-dropdown של הפילטר (mat-menu)
+     ============================ */
+  
+  /* מעטפת כללית של תפריט הפילטר – ריווח פנימי, גובה/רוחב */
+  .filter-menu {
+    padding: 8px 16px;
+    max-height: 260px;     // גובה מקסימלי – גלילה אם עובר
+    width: 220px;          // רוחב קבוע ונעים
+    box-sizing: border-box;
+    overflow-y: auto;      // גלילה אנכית אם יש הרבה ערכים
   }
-
-  .filter-buttons {
-    display: flex;
-    gap: 8px;
-    margin-right: auto; // ב-RTL כדי לדחוף לשמאל
-  }
-
-  .loading-container {
+  
+  /* רשימת ה-checkboxים בתוך הפילטר */
+  .filter-options {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    margin-top: 24px;
-
-    .loading-text {
-      margin-top: 8px;
-    }
+    gap: 4px;              // רווח קטן בין שורה לשורה
   }
-
-  .error-card {
-    margin-top: 16px;
-    color: #b71c1c;
-  }
-
-  .table-container {
-    overflow-x: auto;
-  }
-
-  table {
-    width: 100%;
-
-    th.mat-header-cell,
-    td.mat-cell {
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    th.mat-header-cell {
-      vertical-align: top; // כדי שהכותרת + אייקון הפילטר יהיו למעלה
-    }
-
-    .no-data-row td {
-      text-align: center;
-      font-style: italic;
-    }
-
-    /* טקסט הכותרת בשורה הראשונה */
-    .header-title {
-      font-weight: 500;
-      margin-bottom: 2px;
-      font-size: 13px;
-    }
-
-    /* העטיפה של כותרת + אייקון פילטר בתוך ה-th */
-    .header-filter-wrapper {
-      display: flex;
-      flex-direction: row;     // 🟢 שורה אחת
-
-      align-items: flex-start;
-      cursor: pointer;
-      padding: 2px 0;
-    }
-
-    .header-filter-icon-row {
-      display: flex;
-      align-items: center;
-    }
-
-    .header-filter-icon {
-      font-size: 18px;
-    }
-  }
-}
-
-.clickable-row {
-  cursor: pointer;
-}
-
-.clickable-row:hover {
-  background: #f0f0f0;
-}
-
-/* תוכן ה־mat-menu של הפילטר (צ'קבוקסים) */
-.filter-menu {
-  padding: 4px 12px;
-}
-
-.filter-options {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+  
