@@ -282,3 +282,27 @@
   color: #1f2933;
   font-size: 13px;
 }
+/* כותרת תאריך + אייקונים */
+.header-date-filter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* אייקונים */
+.header-date-icon,
+.header-date-clear {
+  width: 28px;
+  height: 28px;
+}
+
+/* כשיש פילטר תאריכים – צבע כחול */
+.header-date-icon.active-filter mat-icon,
+.active-filter mat-icon {
+  color: #1976d2;
+}
+
+/* להסתיר את ה־date-range input לגמרי */
+.header-hidden-date-input {
+  display: none;
+}

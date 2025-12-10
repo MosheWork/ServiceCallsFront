@@ -62,8 +62,7 @@ export class ServiceCallListComponent implements OnInit {
   allCalls: ServiceCallFullModel[] = [];
   newCallsCount = 0; 
 // 🔹 Date range filter for תאריך פתיחה
-startDate: Date | null = null;
-endDate: Date | null = null;
+
 
   isLoading = false;
   errorMessage = '';
@@ -174,7 +173,7 @@ endDate: Date | null = null;
   /** מיישם את כל הפילטרים (חיפוש, עמודות, תאריכים) */
   applyFilter(): void {
     const text = (this.searchText || '').toLowerCase();
-
+  
     const filtered = this.allCalls.filter(c => {
       // --- חיפוש חופשי ---
       if (text) {
@@ -188,38 +187,38 @@ endDate: Date | null = null;
         ]
           .join(' ')
           .toLowerCase();
-
+  
         if (!blob.includes(text)) {
           return false;
         }
       }
-
+  
       // --- פילטרים לפי ערכי עמודות (multi select) ---
-      if (!this.fieldMatches(c.title,               this.selectedTitles))          return false;
-      if (!this.fieldMatches(c.requestUser,         this.selectedRequestUsers))    return false;
-      if (!this.fieldMatches(c.callbackPhone,       this.selectedCallbackPhones))  return false;
-      if (!this.fieldMatches(c.mainCategoryName,    this.selectedMainCategories))  return false;
-      if (!this.fieldMatches(c.subCategory1Name,    this.selectedSubCategory1))    return false;
-      if (!this.fieldMatches(c.subCategory2Name,    this.selectedSubCategory2))    return false;
-      if (!this.fieldMatches(c.statusName,          this.selectedStatuses))        return false;
-      if (!this.fieldMatches(c.priorityName,        this.selectedPriorities))      return false;
-      if (!this.fieldMatches(c.teamInChargeName,    this.selectedTeams))           return false;
-      if (!this.fieldMatches(c.userInChargeName,    this.selectedUsersInCharge))   return false;
-
+      if (!this.fieldMatches(c.title,            this.selectedTitles))         return false;
+      if (!this.fieldMatches(c.requestUser,      this.selectedRequestUsers))   return false;
+      if (!this.fieldMatches(c.callbackPhone,    this.selectedCallbackPhones)) return false;
+      if (!this.fieldMatches(c.mainCategoryName, this.selectedMainCategories)) return false;
+      if (!this.fieldMatches(c.subCategory1Name, this.selectedSubCategory1))   return false;
+      if (!this.fieldMatches(c.subCategory2Name, this.selectedSubCategory2))   return false;
+      if (!this.fieldMatches(c.statusName,       this.selectedStatuses))       return false;
+      if (!this.fieldMatches(c.priorityName,     this.selectedPriorities))     return false;
+      if (!this.fieldMatches(c.teamInChargeName, this.selectedTeams))          return false;
+      if (!this.fieldMatches(c.userInChargeName, this.selectedUsersInCharge))  return false;
+  
       // --- פילטר טווח תאריכים על entryTime ---
       if (this.entryDateFrom || this.entryDateTo) {
         if (!c.entryTime) {
           return false;
         }
-
+  
         const d = new Date(c.entryTime);
         if (isNaN(d.getTime())) {
           return false;
         }
-
-        // משווים לפי תאריך בלבד (בלי שעות)
+  
+        // תאריך בלבד (בלילה 00:00)
         const day = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-
+  
         if (this.entryDateFrom) {
           const start = new Date(
             this.entryDateFrom.getFullYear(),
@@ -230,7 +229,7 @@ endDate: Date | null = null;
             return false;
           }
         }
-
+  
         if (this.entryDateTo) {
           const end = new Date(
             this.entryDateTo.getFullYear(),
@@ -242,16 +241,16 @@ endDate: Date | null = null;
           }
         }
       }
-
+  
       return true;
     });
-
+  
     // מעדכן טבלה
     this.dataSource.data = filtered;
-
+  
     // מעדכן "קריאות חדשות" לפי הרשימה המסוננת
     this.newCallsCount = filtered.filter(c => c.statusName === 'חדש').length;
-
+  
     // פאג'ינייטור וסורט
     if (this.paginator) {
       this.dataSource.paginator = this.paginator;
@@ -260,13 +259,13 @@ endDate: Date | null = null;
       this.dataSource.sort = this.sort;
     }
   }
+  
 
   
   /** איפוס כל הפילטרים */
   clearFilters(): void {
     this.searchText = '';
   
-    // reset all multi-select filters
     this.selectedTitles = [];
     this.selectedRequestUsers = [];
     this.selectedCallbackPhones = [];
@@ -279,8 +278,8 @@ endDate: Date | null = null;
     this.selectedUsersInCharge = [];
   
     // 🔹 reset date range
-    this.startDate = null;
-    this.endDate = null;
+    this.entryDateFrom = null;
+    this.entryDateTo = null;
   
     this.applyFilter();
   }
@@ -467,18 +466,8 @@ endDate: Date | null = null;
     this.applyFilter();
   }
 
-  onDateFilterChange(): void {
-    this.applyFilter();
-  }
-  
-  clearDateFilter(event?: MouseEvent): void {
-    if (event) {
-      event.stopPropagation();
-    }
-    this.startDate = null;
-    this.endDate = null;
-    this.applyFilter();
-  }
+
+
   onEntryDateRangeChange(): void {
     this.applyFilter();
   }
