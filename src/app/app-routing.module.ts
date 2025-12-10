@@ -14,7 +14,7 @@ const routes: Routes = [
   { path: 'service-calls/:id', component: ServiceCallEditComponent } ,
 
   // אופציונלי – דף 404
-  { path: '**', redirectTo: 'service-call/new' }
+  { path: '**', redirectTo: 'service-call-list' }
 ];
 
 @NgModule({

@@ -1,78 +1,120 @@
 .service-call-list {
-    padding: 16px;
-    max-width: 1300px;
-    margin: 0 auto;
-  
-    .header-card {
-      margin-bottom: 12px;
-  
-      h1 {
-        margin: 0;
-        text-align: right;
-      }
+  padding: 16px;
+  max-width: 1300px;
+  margin: 0 auto;
+
+  .header-card {
+    margin-bottom: 12px;
+
+    h1 {
+      margin: 0;
+      text-align: right;
     }
-  
-    .filter-card {
-      margin-bottom: 12px;
+  }
+
+  .filter-card {
+    margin-bottom: 12px;
+  }
+
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+  }
+
+  .filter-field {
+    min-width: 220px;
+    flex: 1 1 220px;
+  }
+
+  .filter-buttons {
+    display: flex;
+    gap: 8px;
+    margin-right: auto; // ב-RTL כדי לדחוף לשמאל
+  }
+
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 24px;
+
+    .loading-text {
+      margin-top: 8px;
     }
-  
-    .filter-row {
+  }
+
+  .error-card {
+    margin-top: 16px;
+    color: #b71c1c;
+  }
+
+  .table-container {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+
+    th.mat-header-cell,
+    td.mat-cell {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    th.mat-header-cell {
+      vertical-align: top; // כדי שהכותרת + אייקון הפילטר יהיו למעלה
+    }
+
+    .no-data-row td {
+      text-align: center;
+      font-style: italic;
+    }
+
+    /* טקסט הכותרת בשורה הראשונה */
+    .header-title {
+      font-weight: 500;
+      margin-bottom: 2px;
+      font-size: 13px;
+    }
+
+    /* העטיפה של כותרת + אייקון פילטר בתוך ה-th */
+    .header-filter-wrapper {
       display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: flex-end;
+      flex-direction: row;     // 🟢 שורה אחת
+
+      align-items: flex-start;
+      cursor: pointer;
+      padding: 2px 0;
     }
-  
-    .filter-field {
-      min-width: 220px;
-      flex: 1 1 220px;
-    }
-  
-    .filter-buttons {
+
+    .header-filter-icon-row {
       display: flex;
-      gap: 8px;
-      margin-right: auto; // ב-RTL כדי לדחוף לשמאל
-    }
-  
-    .loading-container {
-      display: flex;
-      flex-direction: column;
       align-items: center;
-      margin-top: 24px;
-  
-      .loading-text {
-        margin-top: 8px;
-      }
     }
-  
-    .error-card {
-      margin-top: 16px;
-      color: #b71c1c;
-    }
-  
-    .table-container {
-      overflow-x: auto;
-    }
-  
-    table {
-      width: 100%;
-  
-      th.mat-header-cell,
-      td.mat-cell {
-        text-align: right;
-        white-space: nowrap;
-      }
-  
-      .no-data-row td {
-        text-align: center;
-        font-style: italic;
-      }
+
+    .header-filter-icon {
+      font-size: 18px;
     }
   }
-  .clickable-row {
-    cursor: pointer;
-  }
-  .clickable-row:hover {
-    background: #f0f0f0;
-  }
-  
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover {
+  background: #f0f0f0;
+}
+
+/* תוכן ה־mat-menu של הפילטר (צ'קבוקסים) */
+.filter-menu {
+  padding: 4px 12px;
+}
+
+.filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

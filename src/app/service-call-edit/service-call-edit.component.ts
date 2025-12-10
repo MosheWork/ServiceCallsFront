@@ -8,6 +8,9 @@ export interface ServiceCallModel {
   serviceCallID: number;
   title: string | null;
   description: string | null;
+
+  solutionText: string | null;   // 🔹 NEW
+
   requestUser: string | null;
   callbackPhone: string | null;
   location: string | null;
@@ -25,6 +28,14 @@ export interface ServiceCallModel {
 
   entryTime?: string | null;
 }
+
+export interface UserInChargeModel {
+  userInChargeID: number;
+  displayName: string;
+  id_No: string | null;
+  teamInChargeID: number | null;
+}
+
 
 export interface LookupItem {
   id: number;
@@ -51,7 +62,9 @@ export class ServiceCallEditComponent implements OnInit {
   statuses: LookupItem[] = [];
   priorities: LookupItem[] = [];
   // you can add: usersInCharge, teams, requestTypes...
-
+  teams: LookupItem[] = [];                 // ✅ חדש – צוותים
+  usersAll: UserInChargeModel[] = [];       // כל המשתמשים
+  usersFiltered: UserInChargeModel[] = [];  // מסו
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -65,7 +78,7 @@ export class ServiceCallEditComponent implements OnInit {
     this.buildForm();
     this.loadLookups();
 
-    this.http.get<ServiceCallModel>(`${environment.apiBaseUrl}/ServiceCalls/${this.callId}`)
+    this.http.get<ServiceCallModel>(`${environment.apiBaseUrl}/api/ServiceCalls/${this.callId}`)
       .subscribe({
         next: call => {
           this.form.patchValue(call);
@@ -79,7 +92,7 @@ export class ServiceCallEditComponent implements OnInit {
               }
             });
           }
-
+          this.applyUsersFilter();
           this.isLoading = false;
         },
         error: err => {
@@ -93,11 +106,12 @@ export class ServiceCallEditComponent implements OnInit {
     this.form = this.fb.group({
       title: [null],
       description: [null],
+      solutionText: [null],      // 🔹 NEW
       requestUser: [null],
       callbackPhone: [null],
       location: [null],
       computerName: [null],
-
+  
       mainCategoryID: [null],
       subCategory1ID: [null],
       subCategory2ID: [null],
@@ -109,21 +123,34 @@ export class ServiceCallEditComponent implements OnInit {
       serviceRequestTypeID: [null]
     });
   }
-
+  
   /* ---------- lookups ---------- */
 
   private loadLookups() {
-    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/ServiceCalls/MainCategories`)
+    // Main categories
+    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/api/ServiceCalls/MainCategories`)
       .subscribe(l => this.mainCategories = l);
-
-    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/ServiceCalls/Statuses`)
+  
+    // Statuses
+    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/api/ServiceCalls/Statuses`)
       .subscribe(l => this.statuses = l);
-
-    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/ServiceCalls/Priorities`)
+  
+    // Priorities
+    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/api/ServiceCalls/Priorities`)
       .subscribe(l => this.priorities = l);
-
-    // TODO: add GETs for users/teams/request types if you create endpoints
+  
+    // ✅ Teams
+    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/api/ServiceCalls/TeamsInCharge`)
+      .subscribe(l => this.teams = l);
+  
+    // ✅ Users in charge
+    this.http.get<UserInChargeModel[]>(`${environment.apiBaseUrl}/api/ServiceCalls/UsersInCharge`)
+      .subscribe(list => {
+        this.usersAll = list;
+        this.applyUsersFilter();   // סינון ראשוני (במידה ויש כבר team בטופס)
+      });
   }
+  
 
   onMainCategoryChange(id: number) {
     this.form.patchValue({
@@ -141,7 +168,7 @@ export class ServiceCallEditComponent implements OnInit {
 
   private loadSub1(mainCategoryId: number, callback?: () => void) {
     const params = new HttpParams().set('mainCategoryId', mainCategoryId.toString());
-    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/ServiceCalls/SubCategory1`, { params })
+    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/api/ServiceCalls/SubCategory1`, { params })
       .subscribe(list => {
         this.sub1 = list;
         if (callback) callback();
@@ -165,7 +192,7 @@ export class ServiceCallEditComponent implements OnInit {
   // ⭐ פונקציה חדשה לטעינת SubCategory2
   private loadSub2(subCategory1Id: number, callback?: () => void) {
     const params = new HttpParams().set('subCategory1Id', subCategory1Id.toString());
-    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/ServiceCalls/SubCategory2`, { params })
+    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/api/ServiceCalls/SubCategory2`, { params })
       .subscribe(list => {
         this.sub2 = list;
         if (callback) callback();
@@ -184,7 +211,7 @@ export class ServiceCallEditComponent implements OnInit {
 
     this.isLoading = true;
 
-    this.http.put(`${environment.apiBaseUrl}/ServiceCalls/${this.callId}`, body)
+    this.http.put(`${environment.apiBaseUrl}/api/ServiceCalls/${this.callId}`, body)
       .subscribe({
         next: () => {
           this.isLoading = false;
@@ -200,4 +227,32 @@ export class ServiceCallEditComponent implements OnInit {
   cancel() {
     this.router.navigate(['/service-calls']);
   }
+  private applyUsersFilter() {
+    const teamId: number | null = this.form?.value?.teamInChargeID ?? null;
+  
+    if (!teamId) {
+      this.usersFiltered = this.usersAll.slice(); // הכל
+    } else {
+      this.usersFiltered = this.usersAll.filter(u => u.teamInChargeID === teamId);
+    }
+  }
+  onTeamInChargeChange(teamId: number | null) {
+    this.form.patchValue({
+      teamInChargeID: teamId,
+      userInChargeID: null          // ננקה את הבחירה הישנה
+    });
+    this.applyUsersFilter();
+  }
+  
+  onUserInChargeChange(userId: number | null) {
+    this.form.patchValue({ userInChargeID: userId });
+  
+    // אופציונלי: לעדכן את הצוות לפי המשתמש שנבחר
+    const u = this.usersAll.find(x => x.userInChargeID === userId);
+    if (u && u.teamInChargeID) {
+      this.form.patchValue({ teamInChargeID: u.teamInChargeID });
+      this.applyUsersFilter();
+    }
+  }
+  
 }

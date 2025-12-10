@@ -1,190 +1,247 @@
 <div class="service-call-list" dir="rtl">
-    <mat-card class="header-card">
-      <h1>קריאות שירות</h1>
-    </mat-card>
-  
-    <!-- 🔍 Filter card -->
-    <mat-card class="filter-card">
-      <div class="filter-row">
-  
-        <!-- חיפוש חופשי -->
-        <mat-form-field appearance="outline" class="filter-field">
-          <mat-label>חיפוש חופשי</mat-label>
-          <input
-            matInput
-            [(ngModel)]="searchText"
-            (ngModelChange)="applyFilter()"
-            placeholder="כותרת, תיאור, משתמש, מחשב..."
-          />
-          <button
-            *ngIf="searchText"
-            matSuffix
-            mat-icon-button
-            aria-label="נקה"
-            (click)="searchText=''; applyFilter()">
-            <mat-icon>close</mat-icon>
-          </button>
-        </mat-form-field>
-  
-        <!-- סטטוס -->
-        <mat-form-field appearance="outline" class="filter-field" *ngIf="distinctStatuses.length">
-          <mat-label>סטטוס</mat-label>
-          <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilter()">
-            <mat-option [value]="''">הכל</mat-option>
-            <mat-option *ngFor="let s of distinctStatuses" [value]="s">
-              {{ s }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-  
-        <!-- קטגוריה ראשית -->
-        <mat-form-field appearance="outline" class="filter-field" *ngIf="distinctMainCategories.length">
-          <mat-label>קטגוריה ראשית</mat-label>
-          <mat-select [(ngModel)]="selectedMainCategory" (selectionChange)="applyFilter()">
-            <mat-option [value]="''">הכל</mat-option>
-            <mat-option *ngFor="let m of distinctMainCategories" [value]="m">
-              {{ m }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-  
-        <div class="filter-buttons">
-          <button mat-stroked-button color="primary" (click)="clearFilters()">
-            איפוס פילטרים
-          </button>
-          <button mat-flat-button color="primary" (click)="loadData()">
-            רענן
-          </button>
+  <mat-card class="header-card">
+    <h1>קריאות שירות</h1>
+  </mat-card>
+
+  <!-- 🔍 Filter card -->
+  <mat-card class="filter-card">
+    <div class="filter-row">
+
+      <!-- חיפוש חופשי -->
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>חיפוש חופשי</mat-label>
+        <input
+          matInput
+          [(ngModel)]="searchText"
+          (ngModelChange)="applyFilter()"
+          placeholder="כותרת, תיאור, משתמש, מחשב..."
+        />
+        <button
+          *ngIf="searchText"
+          matSuffix
+          mat-icon-button
+          aria-label="נקה"
+          (click)="searchText=''; applyFilter()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <div class="filter-buttons">
+        <button mat-stroked-button color="primary" (click)="clearFilters()">
+          איפוס פילטרים
+        </button>
+        <button mat-flat-button color="primary" (click)="loadData()">
+          רענן
+        </button>
+      </div>
+    </div>
+  </mat-card>
+
+  <!-- מצב טעינה / שגיאה -->
+  <div class="loading-container" *ngIf="isLoading">
+    <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
+    <div class="loading-text">טוען נתונים...</div>
+  </div>
+
+  <mat-card *ngIf="!isLoading && errorMessage" class="error-card">
+    {{ errorMessage }}
+  </mat-card>
+
+  <!-- טבלה -->
+  <mat-card *ngIf="!isLoading && !errorMessage">
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z2">
+
+        <!-- # -->
+        <ng-container matColumnDef="index">
+          <th mat-header-cell *matHeaderCellDef>#</th>
+          <td mat-cell *matCellDef="let row; let i = index">
+            {{ i + 1 }}
+          </td>
+        </ng-container>
+
+        <!-- תאריך פתיחה -->
+        <ng-container matColumnDef="entryTime">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>תאריך פתיחה</th>
+          <td mat-cell *matCellDef="let row">
+            {{ formatDate(row.entryTime) }}
+          </td>
+        </ng-container>
+
+        <!-- כותרת -->
+        <ng-container matColumnDef="title">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>כותרת</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.title }}
+          </td>
+        </ng-container>
+
+        <!-- משתמש פותח -->
+        <ng-container matColumnDef="requestUser">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>משתמש פותח</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.requestUser }}
+          </td>
+        </ng-container>
+
+        <!-- טלפון -->
+        <ng-container matColumnDef="callbackPhone">
+          <th mat-header-cell *matHeaderCellDef>טלפון</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.callbackPhone }}
+          </td>
+        </ng-container>
+
+<!-- קטגוריה ראשית + פילטר -->
+<ng-container matColumnDef="mainCategoryName">
+  <th mat-header-cell *matHeaderCellDef>
+
+    <!-- כותרת + אייקון באותה שורה -->
+    <div class="header-filter-wrapper"
+         [matMenuTriggerFor]="mainCategoryMenu"
+         (click)="$event.stopPropagation()">
+
+      <span class="header-title">קטגוריה</span>
+
+      <!-- האייקון צובע את עצמו כשיש בחירה -->
+      <mat-icon
+        class="header-filter-icon"
+        [ngClass]="{ 'active-filter': selectedMainCategories.length > 0 }">
+        filter_list
+      </mat-icon>
+
+    </div>
+
+    <!-- התפריט -->
+    <mat-menu
+      #mainCategoryMenu="matMenu"
+      xPosition="before"
+      [overlapTrigger]="false">
+
+      <div class="filter-menu">
+        <div class="filter-options">
+          <mat-checkbox
+            *ngFor="let m of distinctMainCategories"
+            [checked]="selectedMainCategories.includes(m)"
+            (change)="onMainCategoryCheckboxChange($event.checked, m)">
+            {{ m }}
+          </mat-checkbox>
         </div>
       </div>
-    </mat-card>
-  
-    <!-- מצב טעינה / שגיאה -->
-    <div class="loading-container" *ngIf="isLoading">
-      <mat-progress-spinner mode="indeterminate"></mat-progress-spinner>
-      <div class="loading-text">טוען נתונים...</div>
+
+      <mat-divider></mat-divider>
+
+      <button mat-menu-item (click)="clearMainCategoryFilter()">
+        אפס סנן
+      </button>
+    </mat-menu>
+
+  </th>
+
+  <td mat-cell *matCellDef="let row">
+    {{ row.mainCategoryName }}
+  </td>
+</ng-container>
+
+
+
+
+
+        <!-- תת־קטגוריה 1 -->
+        <ng-container matColumnDef="subCategory1Name">
+          <th mat-header-cell *matHeaderCellDef>תת־קטגוריה 1</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.subCategory1Name }}
+          </td>
+        </ng-container>
+
+        <!-- תת־קטגוריה 2 -->
+        <ng-container matColumnDef="subCategory2Name">
+          <th mat-header-cell *matHeaderCellDef>תת־קטגוריה 2</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.subCategory2Name }}
+          </td>
+        </ng-container>
+
+<!-- סטטוס + פילטר -->
+<ng-container matColumnDef="statusName">
+  <th mat-header-cell *matHeaderCellDef>
+
+    <div class="header-filter-wrapper"
+         [matMenuTriggerFor]="statusMenu"
+         (click)="$event.stopPropagation()">
+
+      <span class="header-title">סטטוס</span>
+      <mat-icon class="header-filter-icon">filter_list</mat-icon>
+
     </div>
-  
-    <mat-card *ngIf="!isLoading && errorMessage" class="error-card">
-      {{ errorMessage }}
-    </mat-card>
-  
-    <!-- טבלה -->
-    <mat-card *ngIf="!isLoading && !errorMessage">
-      <div class="table-container">
-        <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z2">
-  
-          <!-- # -->
-          <ng-container matColumnDef="index">
-            <th mat-header-cell *matHeaderCellDef>#</th>
-            <td mat-cell *matCellDef="let row; let i = index">
-              {{ i + 1 }}
-            </td>
-          </ng-container>
-  
-          <!-- תאריך פתיחה -->
-          <ng-container matColumnDef="entryTime">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>תאריך פתיחה</th>
-            <td mat-cell *matCellDef="let row">
-              {{ formatDate(row.entryTime) }}
-            </td>
-          </ng-container>
-  
-          <!-- כותרת -->
-          <ng-container matColumnDef="title">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>כותרת</th>
-            <td mat-cell *matCellDef="let row">
-              {{ row.title }}
-            </td>
-          </ng-container>
-  
-          <!-- משתמש פותח -->
-          <ng-container matColumnDef="requestUser">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>משתמש פותח</th>
-            <td mat-cell *matCellDef="let row">
-              {{ row.requestUser }}
-            </td>
-          </ng-container>
-  
-          <!-- טלפון -->
-          <ng-container matColumnDef="callbackPhone">
-            <th mat-header-cell *matHeaderCellDef>טלפון</th>
-            <td mat-cell *matCellDef="let row">
-              {{ row.callbackPhone }}
-            </td>
-          </ng-container>
-  
-          <!-- קטגוריה ראשית -->
-          <ng-container matColumnDef="mainCategoryName">
-            <th mat-header-cell *matHeaderCellDef>קטגוריה</th>
-            <td mat-cell *matCellDef="let row">
-              {{ row.mainCategoryName }}
-            </td>
-          </ng-container>
-  
-          <!-- תת־קטגוריה 1 -->
-          <ng-container matColumnDef="subCategory1Name">
-            <th mat-header-cell *matHeaderCellDef>תת־קטגוריה 1</th>
-            <td mat-cell *matCellDef="let row">
-              {{ row.subCategory1Name }}
-            </td>
-          </ng-container>
-  
-          <!-- תת־קטגוריה 2 -->
-          <ng-container matColumnDef="subCategory2Name">
-            <th mat-header-cell *matHeaderCellDef>תת־קטגוריה 2</th>
-            <td mat-cell *matCellDef="let row">
-              {{ row.subCategory2Name }}
-            </td>
-          </ng-container>
-  
-          <!-- סטטוס -->
-          <ng-container matColumnDef="statusName">
-            <th mat-header-cell *matHeaderCellDef>סטטוס</th>
-            <td mat-cell *matCellDef="let row">
-              {{ row.statusName }}
-            </td>
-          </ng-container>
-  
-          <!-- עדיפות -->
-          <ng-container matColumnDef="priorityName">
-            <th mat-header-cell *matHeaderCellDef>עדיפות</th>
-            <td mat-cell *matCellDef="let row">
-              {{ row.priorityName }}
-            </td>
-          </ng-container>
-  
-          <!-- צוות מטפל -->
-          <ng-container matColumnDef="teamInChargeName">
-            <th mat-header-cell *matHeaderCellDef>צוות מטפל</th>
-            <td mat-cell *matCellDef="let row">
-              {{ row.teamInChargeName }}
-            </td>
-          </ng-container>
-  
-          <!-- משתמש מטפל -->
-          <ng-container matColumnDef="userInChargeName">
-            <th mat-header-cell *matHeaderCellDef>משתמש מטפל</th>
-            <td mat-cell *matCellDef="let row">
-              {{ row.userInChargeName }}
-            </td>
-          </ng-container>
-  
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  
-          <tr mat-row
-          *matRowDef="let row; columns: displayedColumns"
-          (click)="openDetails(row)"
-          class="clickable-row">
-      </tr>
-        </table>
+
+    <mat-menu #statusMenu="matMenu" xPosition="before">
+      <div class="filter-menu">
+        <div class="filter-options">
+          <mat-checkbox
+            *ngFor="let s of distinctStatuses"
+            [checked]="selectedStatuses.includes(s)"
+            (change)="onStatusCheckboxChange($event.checked, s)">
+            {{ s }}
+          </mat-checkbox>
+        </div>
       </div>
-  
-      <mat-paginator
-        [pageSize]="20"
-        [pageSizeOptions]="[10, 20, 50, 100]"
-        showFirstLastButtons>
-      </mat-paginator>
-    </mat-card>
-  </div>
-  
+
+      <mat-divider></mat-divider>
+
+      <button mat-menu-item (click)="clearStatusFilter()">
+        אפס סנן
+      </button>
+    </mat-menu>
+
+  </th>
+
+  <td mat-cell *matCellDef="let row">
+    {{ row.statusName }}
+  </td>
+</ng-container>
+
+
+
+        <!-- עדיפות -->
+        <ng-container matColumnDef="priorityName">
+          <th mat-header-cell *matHeaderCellDef>עדיפות</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.priorityName }}
+          </td>
+        </ng-container>
+
+        <!-- צוות מטפל -->
+        <ng-container matColumnDef="teamInChargeName">
+          <th mat-header-cell *matHeaderCellDef>צוות מטפל</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.teamInChargeName }}
+          </td>
+        </ng-container>
+
+        <!-- משתמש מטפל -->
+        <ng-container matColumnDef="userInChargeName">
+          <th mat-header-cell *matHeaderCellDef>משתמש מטפל</th>
+          <td mat-cell *matCellDef="let row">
+            {{ row.userInChargeName }}
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+
+        <tr mat-row
+            *matRowDef="let row; columns: displayedColumns"
+            (click)="openDetails(row)"
+            class="clickable-row">
+        </tr>
+      </table>
+    </div>
+
+    <mat-paginator
+      [pageSize]="20"
+      [pageSizeOptions]="[10, 20, 50, 100]"
+      showFirstLastButtons>
+    </mat-paginator>
+  </mat-card>
+</div>
