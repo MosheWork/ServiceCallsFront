@@ -4,6 +4,7 @@ import { environment } from '../../environments/environment';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+import { Router } from '@angular/router';
 
 export interface ServiceCallFullModel {
   serviceCallID: number;
@@ -69,7 +70,8 @@ export class ServiceCallListComponent implements OnInit {
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient,    private router: Router,
+    ) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -178,5 +180,10 @@ export class ServiceCallListComponent implements OnInit {
     }
     const pad = (n: number) => (n < 10 ? '0' + n : '' + n);
     return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  openDetails(row: ServiceCallFullModel) {
+    // Full model has ServiceCallID
+    this.router.navigate(['/service-calls', row.serviceCallID]);
   }
 }

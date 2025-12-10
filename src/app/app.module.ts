@@ -18,11 +18,13 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ServiceCallEditComponent } from './service-call-edit/service-call-edit.component';
 @NgModule({
   declarations: [
     AppComponent,
     ServiceCallFormComponent,
-    ServiceCallListComponent
+    ServiceCallListComponent,
+    ServiceCallEditComponent
   ],
   imports: [
     BrowserModule,

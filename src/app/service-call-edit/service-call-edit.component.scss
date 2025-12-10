@@ -1,0 +1,31 @@
+.sc-edit-page {
+    padding: 16px;
+  }
+  
+  .sc-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .sc-edit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  
+  .full-width {
+    width: 100%;
+  }
+  
+  .actions {
+    display: flex;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+  
+  .error-msg {
+    color: #b00020;
+    margin-bottom: 8px;
+  }
+  

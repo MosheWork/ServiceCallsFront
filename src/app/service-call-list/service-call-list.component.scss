@@ -69,4 +69,10 @@
       }
     }
   }
+  .clickable-row {
+    cursor: pointer;
+  }
+  .clickable-row:hover {
+    background: #f0f0f0;
+  }
   

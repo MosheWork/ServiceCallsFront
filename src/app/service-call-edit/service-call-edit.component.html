@@ -1,0 +1,104 @@
+
+<div dir="rtl" class="sc-edit-page" *ngIf="!isLoading">
+  <mat-card>
+    <mat-card-title>עריכת קריאת שירות #{{ callId }}</mat-card-title>
+
+    <div *ngIf="errorMessage" class="error-msg">{{ errorMessage }}</div>
+
+    <form [formGroup]="form" class="sc-edit-form">
+
+      <div class="sc-edit-grid">
+
+        <mat-form-field appearance="outline">
+          <mat-label>כותרת</mat-label>
+          <input matInput formControlName="title">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>מבקש</mat-label>
+          <input matInput formControlName="requestUser">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>טלפון לחזרה</mat-label>
+          <input matInput formControlName="callbackPhone">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>מיקום</mat-label>
+          <input matInput formControlName="location">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>שם מחשב</mat-label>
+          <input matInput formControlName="computerName">
+        </mat-form-field>
+
+        <!-- קטגוריות -->
+        <mat-form-field appearance="outline">
+          <mat-label>קטגוריה ראשית</mat-label>
+          <mat-select formControlName="mainCategoryID"
+                      (selectionChange)="onMainCategoryChange($event.value)">
+            <mat-option [value]="null">הכל</mat-option>
+            <mat-option *ngFor="let c of mainCategories" [value]="c.id">
+              {{ c.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>קטגוריה 1</mat-label>
+          <mat-select formControlName="subCategory1ID"
+                      (selectionChange)="onSubCategory1Change($event.value)">
+            <mat-option [value]="null">הכל</mat-option>
+            <mat-option *ngFor="let c of sub1" [value]="c.id">
+              {{ c.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>קטגוריה 2</mat-label>
+          <mat-select formControlName="subCategory2ID">
+            <mat-option [value]="null">הכל</mat-option>
+            <mat-option *ngFor="let c of sub2" [value]="c.id">
+              {{ c.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>סטטוס</mat-label>
+          <mat-select formControlName="statusID">
+            <mat-option [value]="null">ללא</mat-option>
+            <mat-option *ngFor="let s of statuses" [value]="s.id">
+              {{ s.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>עדיפות</mat-label>
+          <mat-select formControlName="priorityID">
+            <mat-option [value]="null">ללא</mat-option>
+            <mat-option *ngFor="let p of priorities" [value]="p.id">
+              {{ p.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+      </div>
+
+      <mat-form-field class="full-width" appearance="outline">
+        <mat-label>תיאור</mat-label>
+        <textarea matInput rows="4" formControlName="description"></textarea>
+      </mat-form-field>
+
+      <div class="actions">
+        <button mat-raised-button color="primary" (click)="save()">שמירה</button>
+        <button mat-button type="button" (click)="cancel()">ביטול</button>
+      </div>
+
+    </form>
+  </mat-card>
+</div>
