@@ -69,15 +69,47 @@
           </td>
         </ng-container>
 
-        <!-- תאריך פתיחה + sort -->
-        <ng-container matColumnDef="entryTime">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header="entryTime">
-            תאריך פתיחה
-          </th>
-          <td mat-cell *matCellDef="let row">
-            {{ formatDate(row.entryTime) }}
-          </td>
-        </ng-container>
+        <!-- תאריך פתיחה + פילטר טווח תאריכים -->
+<ng-container matColumnDef="entryTime">
+  <th mat-header-cell *matHeaderCellDef mat-sort-header>
+    <div class="header-date-filter">
+      <span class="header-title">תאריך פתיחה</span>
+
+      <!-- אייקון לוח שנה – פותח את ה־range picker -->
+      <button
+        mat-icon-button
+        class="header-date-icon"
+        (click)="entryDateRangePicker.open()"
+        [ngClass]="{ 'active-filter': entryDateFrom || entryDateTo }">
+        <mat-icon>calendar_today</mat-icon>
+      </button>
+
+      <!-- איקס לניקוי -->
+      <button
+        *ngIf="entryDateFrom || entryDateTo"
+        mat-icon-button
+        class="header-date-clear"
+        (click)="clearEntryDateRange($event)">
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <!-- input נסתר – רק לחיבור ל־picker -->
+      <mat-date-range-input
+        class="header-hidden-date-input"
+        [rangePicker]="entryDateRangePicker"
+        (dateChange)="onEntryDateRangeChange()">
+        <input matStartDate [(ngModel)]="entryDateFrom">
+        <input matEndDate [(ngModel)]="entryDateTo">
+      </mat-date-range-input>
+
+      <mat-date-range-picker #entryDateRangePicker></mat-date-range-picker>
+    </div>
+  </th>
+
+  <td mat-cell *matCellDef="let row">
+    {{ formatDate(row.entryTime) }}
+  </td>
+</ng-container>
 
         <!-- כותרת + פילטר + sort -->
         <ng-container matColumnDef="title">

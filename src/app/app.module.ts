@@ -22,6 +22,11 @@ import { ServiceCallEditComponent } from './service-call-edit/service-call-edit.
 import { MatMenuModule } from '@angular/material/menu';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDividerModule } from '@angular/material/divider';
+import { CommonModule } from '@angular/common';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
+
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -48,7 +53,10 @@ import { MatDividerModule } from '@angular/material/divider';
     FormsModule,
     MatMenuModule,
     MatCheckboxModule,
-    MatDividerModule
+    MatDividerModule,
+    CommonModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   providers: [],
   bootstrap: [AppComponent]
