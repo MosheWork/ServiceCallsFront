@@ -2,14 +2,20 @@
 
   <!-- כרטיס כותרת עליון -->
   <div class="sc-card sc-header-card">
-    <h1>קריאת שירות {{ callId }}</h1>
+    <h1>
+      <mat-icon>receipt_long</mat-icon>
+      קריאת שירות {{ callId }}
+    </h1>
   </div>
 
   <form [formGroup]="form" (ngSubmit)="save()">
 
     <!-- ===== כרטיס: שיוך וסטטוסים ===== -->
     <div class="sc-card">
-      <div class="sc-card-title">שיוך וסטטוסים</div>
+      <div class="sc-card-title">
+        <mat-icon>tune</mat-icon>
+        <span>שיוך וסטטוסים</span>
+      </div>
 
       <div class="sc-grid sc-grid-3">
 
@@ -101,72 +107,67 @@
       </div>
     </div>
 
-    <!-- ===== כרטיס מפוצל: ימין פותח הקריאה / שמאל פרטי הקריאה ===== -->
+    <!-- ===== כרטיס מפוצל ===== -->
     <div class="sc-card sc-split-card">
 
       <!-- צד ימין: פרטי פותח הקריאה -->
       <div class="split-col split-col-right">
         <div class="sc-card-title sc-card-title-small">
-          פרטי פותח הקריאה – מבקש / טלפון לחזרה / מיקום / שם מחשב
+          <mat-icon>person_pin_circle</mat-icon>
+          <span>פרטי פותח הקריאה – מבקש / טלפון לחזרה / מיקום / שם מחשב</span>
         </div>
 
         <div class="sc-grid sc-grid-1">
-
-          <!-- מבקש -->
           <mat-form-field appearance="outline" class="full-width readonly-field">
             <mat-label>מבקש</mat-label>
             <input matInput formControlName="requestUser" readonly>
           </mat-form-field>
 
-          <!-- טלפון לחזרה -->
           <mat-form-field appearance="outline" class="full-width readonly-field">
             <mat-label>טלפון לחזרה</mat-label>
             <input matInput formControlName="callbackPhone" readonly>
           </mat-form-field>
 
-          <!-- מיקום -->
           <mat-form-field appearance="outline" class="full-width readonly-field">
             <mat-label>מיקום</mat-label>
             <input matInput formControlName="location" readonly>
           </mat-form-field>
 
-          <!-- שם מחשב -->
           <mat-form-field appearance="outline" class="full-width readonly-field">
             <mat-label>שם מחשב</mat-label>
             <input matInput formControlName="computerName" readonly>
           </mat-form-field>
-
         </div>
       </div>
 
-      <!-- צד שמאל: פרטי הקריאה – כותרת + תיאור -->
+      <!-- צד שמאל: פרטי הקריאה -->
       <div class="split-col split-col-left">
         <div class="sc-card-title sc-card-title-small">
-          פרטי הקריאה – כותרת / תיאור התקלה
+          <mat-icon>description</mat-icon>
+          <span>פרטי הקריאה – כותרת / תיאור התקלה</span>
         </div>
 
         <div class="sc-grid sc-grid-1">
-
-          <!-- כותרת הקריאה -->
           <mat-form-field appearance="outline" class="full-width readonly-field">
             <mat-label>כותרת הקריאה</mat-label>
             <input matInput formControlName="title" readonly>
           </mat-form-field>
 
-          <!-- תיאור התקלה -->
           <mat-form-field appearance="outline" class="full-width readonly-field">
             <mat-label>תיאור התקלה</mat-label>
             <textarea matInput rows="4" formControlName="description" readonly></textarea>
           </mat-form-field>
-
         </div>
       </div>
 
     </div>
 
-    <!-- ===== כרטיס: פתרון / סיכום טיפול ===== -->
+    <!-- ===== כרטיס: פתרון ===== -->
     <div class="sc-card">
-      <div class="sc-card-title">פתרון סיכום טיפול</div>
+      <div class="sc-card-title">
+        <mat-icon>task_alt</mat-icon>
+        <span>פתרון סיכום טיפול</span>
+      </div>
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>פתרון / סיכום טיפול</mat-label>
@@ -176,13 +177,14 @@
 
     <!-- כפתורים -->
     <div class="sc-actions">
-      <button mat-button type="button" (click)="cancel()">ביטול</button>
+      <button mat-stroked-button color="primary" type="button" (click)="cancel()">
+        ביטול
+      </button>
       <button mat-raised-button color="primary" type="submit">
         שמירה
       </button>
     </div>
 
-    <!-- שגיאה כללית -->
     <div *ngIf="errorMessage" class="message error">
       {{ errorMessage }}
     </div>
