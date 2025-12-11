@@ -25,17 +25,22 @@
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
   
-        <table mat-table [dataSource]="teamsDS" class="config-table mat-elevation-z1">
+        <table
+          mat-table
+          [dataSource]="teamsDS"
+          class="config-table mat-elevation-z1"
+          matSort
+          #teamsSort="matSort">
   
           <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef>מס'</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>מס'</th>
             <td mat-cell *matCellDef="let r">
               {{ r.teamInChargeID }}
             </td>
           </ng-container>
   
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef>שם צוות</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>שם צוות</th>
             <td mat-cell *matCellDef="let r">
               {{ r.teamName }}
             </td>
@@ -77,17 +82,22 @@
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
   
-        <table mat-table [dataSource]="departmentsDS" class="config-table mat-elevation-z1">
+        <table
+          mat-table
+          [dataSource]="departmentsDS"
+          class="config-table mat-elevation-z1"
+          matSort
+          #departmentsSort="matSort">
   
           <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef>מס'</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>מס'</th>
             <td mat-cell *matCellDef="let r">
               {{ r.departmentInChargeID }}
             </td>
           </ng-container>
   
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef>שם מחלקה</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>שם מחלקה</th>
             <td mat-cell *matCellDef="let r">
               {{ r.departmentName }}
             </td>
@@ -129,17 +139,22 @@
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
   
-        <table mat-table [dataSource]="statusesDS" class="config-table mat-elevation-z1">
+        <table
+          mat-table
+          [dataSource]="statusesDS"
+          class="config-table mat-elevation-z1"
+          matSort
+          #statusesSort="matSort">
   
           <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef>מס'</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>מס'</th>
             <td mat-cell *matCellDef="let r">
               {{ r.statusID }}
             </td>
           </ng-container>
   
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef>שם סטטוס</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>שם סטטוס</th>
             <td mat-cell *matCellDef="let r">
               {{ r.statusName }}
             </td>
@@ -181,27 +196,32 @@
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
   
-        <table mat-table [dataSource]="usersDS" class="config-table mat-elevation-z1">
+        <table
+          mat-table
+          [dataSource]="usersDS"
+          class="config-table mat-elevation-z1"
+          matSort
+          #usersSort="matSort">
   
           <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef>מס'</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>מס'</th>
             <td mat-cell *matCellDef="let r">{{ r.userInChargeID }}</td>
           </ng-container>
   
           <ng-container matColumnDef="displayName">
-            <th mat-header-cell *matHeaderCellDef>שם</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>שם</th>
             <td mat-cell *matCellDef="let r">{{ r.displayName }}</td>
           </ng-container>
   
           <ng-container matColumnDef="team">
-            <th mat-header-cell *matHeaderCellDef>צוות</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>צוות</th>
             <td mat-cell *matCellDef="let r">
               {{ getTeamName(r.teamInChargeID) }}
             </td>
           </ng-container>
   
           <ng-container matColumnDef="idNo">
-            <th mat-header-cell *matHeaderCellDef>ת"ז / ID_No</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>ת"ז / ID_No</th>
             <td mat-cell *matCellDef="let r">{{ r.iD_No }}</td>
           </ng-container>
   
@@ -241,27 +261,32 @@
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
   
-        <table mat-table [dataSource]="mainCatDS" class="config-table mat-elevation-z1">
+        <table
+          mat-table
+          [dataSource]="mainCatDS"
+          class="config-table mat-elevation-z1"
+          matSort
+          #mainCatSort="matSort">
   
           <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef>מס'</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>מס'</th>
             <td mat-cell *matCellDef="let r">{{ r.mainCategoryID }}</td>
           </ng-container>
   
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef>שם קטגוריה</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>שם קטגוריה</th>
             <td mat-cell *matCellDef="let r">{{ r.name }}</td>
           </ng-container>
   
           <ng-container matColumnDef="department">
-            <th mat-header-cell *matHeaderCellDef>מחלקה אחראית</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>מחלקה אחראית</th>
             <td mat-cell *matCellDef="let r">
               {{ getDepartmentName(r.departmentInChargeID) }}
             </td>
           </ng-container>
   
           <ng-container matColumnDef="team">
-            <th mat-header-cell *matHeaderCellDef>צוות אחראי</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>צוות אחראי</th>
             <td mat-cell *matCellDef="let r">
               {{ getTeamName(r.teamInChargeID) }}
             </td>
@@ -303,20 +328,25 @@
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
   
-        <table mat-table [dataSource]="subCat1DS" class="config-table mat-elevation-z1">
+        <table
+          mat-table
+          [dataSource]="subCat1DS"
+          class="config-table mat-elevation-z1"
+          matSort
+          #subCat1Sort="matSort">
   
           <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef>מס'</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>מס'</th>
             <td mat-cell *matCellDef="let r">{{ r.subCategory1ID }}</td>
           </ng-container>
   
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef>שם</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>שם</th>
             <td mat-cell *matCellDef="let r">{{ r.name }}</td>
           </ng-container>
   
           <ng-container matColumnDef="parent">
-            <th mat-header-cell *matHeaderCellDef>קטגוריה ראשית</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>קטגוריה ראשית</th>
             <td mat-cell *matCellDef="let r">
               {{ getMainCategoryName(r.mainCategoryID) }}
             </td>
@@ -358,20 +388,25 @@
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>
   
-        <table mat-table [dataSource]="subCat2DS" class="config-table mat-elevation-z1">
+        <table
+          mat-table
+          [dataSource]="subCat2DS"
+          class="config-table mat-elevation-z1"
+          matSort
+          #subCat2Sort="matSort">
   
           <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef>מס'</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>מס'</th>
             <td mat-cell *matCellDef="let r">{{ r.subCategory2ID }}</td>
           </ng-container>
   
           <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef>שם</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>שם</th>
             <td mat-cell *matCellDef="let r">{{ r.name }}</td>
           </ng-container>
   
           <ng-container matColumnDef="parent">
-            <th mat-header-cell *matHeaderCellDef>תת קטגוריה 1</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>תת קטגוריה 1</th>
             <td mat-cell *matCellDef="let r">
               {{ getMainCategoryName(r.subCategory1ID) }}
             </td>
@@ -521,7 +556,7 @@
             <input
               matInput
               placeholder="חיפוש צוות..."
-              [(ngModel)]="mainCatSelectSearch"
+              [(ngModel)]="mainCatTeamSelectSearch"
               name="mainCatTeamSelectSearch"
               [ngModelOptions]="{ standalone: true }"
               (click)="$event.stopPropagation()"
@@ -566,7 +601,6 @@
         </mat-label>
   
         <mat-select formControlName="parentId">
-  
           <!-- search input for parent (depends on level) -->
           <mat-option disabled *ngIf="subCatLevel === 2">
             <input

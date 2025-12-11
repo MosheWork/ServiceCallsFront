@@ -1,588 +1,612 @@
 import {
-  AfterViewInit,
   Component,
   OnInit,
-  TemplateRef,
-  ViewChild
+  ViewChild,
+  TemplateRef
 } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { HttpClient } from '@angular/common/http';
+import { MatSort } from '@angular/material/sort';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatDialog } from '@angular/material/dialog';
 import { forkJoin } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-/* ========= Interfaces – must match backend models ========= */
-
-export interface TeamInCharge {
+export interface TeamModel {
   teamInChargeID: number;
   teamName: string;
 }
 
-export interface DepartmentInCharge {
+export interface DepartmentModel {
   departmentInChargeID: number;
   departmentName: string;
 }
 
-export interface ServiceCallStatus {
+export interface StatusModel {
   statusID: number;
   statusName: string;
 }
 
-export interface ServiceCallUserInCharge {
+export interface UserInChargeModel {
   userInChargeID: number;
   displayName: string;
   teamInChargeID: number | null;
-  iD_No?: string | null;
+  iD_No: string | null;
 }
 
-export interface MainCategory {
+export interface MainCategoryModel {
   mainCategoryID: number;
   name: string;
-  departmentInChargeID: number;
-  teamInChargeID: number;
+  departmentInChargeID: number | null;
+  teamInChargeID: number | null;
 }
 
-export interface SubCategory1 {
+export interface SubCategory1Model {
   subCategory1ID: number;
-  mainCategoryID: number;
   name: string;
+  mainCategoryID: number;
 }
 
-export interface SubCategory2 {
+export interface SubCategory2Model {
   subCategory2ID: number;
-  subCategory1ID: number;
   name: string;
+  subCategory1ID: number;
 }
 
-// export interface SubCategory3 {
-//   subCategory3ID: number;
-//   mainCategoryID: number;
-//   name: string;
-// }
-
-type SimpleEntityType = 'team' | 'department' | 'status';
-
-type SubCatLevel = 1 | 2 | 3;
+type SimpleType = 'team' | 'department' | 'status';
 
 @Component({
   selector: 'app-service-calls-admin-config',
   templateUrl: './service-calls-admin-config.component.html',
   styleUrls: ['./service-calls-admin-config.component.scss']
 })
-export class ServiceCallsAdminConfigComponent implements OnInit, AfterViewInit {
-  isLoading = true;
+export class ServiceCallsAdminConfigComponent implements OnInit {
+  baseUrl = environment.apiBaseUrl + '/ServiceCallsAdminConfig';
+
+  isLoading = false;
   errorMessage = '';
 
-  private baseUrl = `${environment.apiBaseUrl}/ServiceCallsAdminConfig`;
- // table search strings
- teamsFilter = '';
- departmentsFilter = '';
- statusesFilter = '';
- usersFilter = '';
- mainCatFilter = '';
- subCat1Filter = '';
- subCat2Filter = '';
+  // data sources
+  teamsDS       = new MatTableDataSource<TeamModel>();
+  departmentsDS = new MatTableDataSource<DepartmentModel>();
+  statusesDS    = new MatTableDataSource<StatusModel>();
+  usersDS       = new MatTableDataSource<UserInChargeModel>();
+  mainCatDS     = new MatTableDataSource<MainCategoryModel>();
+  subCat1DS     = new MatTableDataSource<SubCategory1Model>();
+  subCat2DS     = new MatTableDataSource<SubCategory2Model>();
 
- // dropdown search strings (dialogs)
- teamSelectSearch = '';
- departmentSelectSearch = '';
- mainCatSelectSearch = '';
- parentMainCatSearch = '';
- parentSubCat1Search = '';
-  /* ====== data sources ====== */
-  teamsDS = new MatTableDataSource<TeamInCharge>([]);
-  departmentsDS = new MatTableDataSource<DepartmentInCharge>([]);
-  statusesDS = new MatTableDataSource<ServiceCallStatus>([]);
-  usersDS = new MatTableDataSource<ServiceCallUserInCharge>([]);
-  mainCatDS = new MatTableDataSource<MainCategory>([]);
-  subCat1DS = new MatTableDataSource<SubCategory1>([]);
-  subCat2DS = new MatTableDataSource<SubCategory2>([]);
-  //subCat3DS = new MatTableDataSource<SubCategory3>([]);
-
-  /* ====== columns ====== */
-  displayedColumnsTeams = ['id', 'name', 'actions'];
+  // displayed columns
+  displayedColumnsTeams       = ['id', 'name', 'actions'];
   displayedColumnsDepartments = ['id', 'name', 'actions'];
-  displayedColumnsStatuses = ['id', 'name', 'actions'];
+  displayedColumnsStatuses    = ['id', 'name', 'actions'];
+  displayedColumnsUsers       = ['id', 'displayName', 'team', 'idNo', 'actions'];
+  displayedColumnsMainCat     = ['id', 'name', 'department', 'team', 'actions'];
+  displayedColumnsSubCat1     = ['id', 'name', 'parent', 'actions'];
+  displayedColumnsSubCat2     = ['id', 'name', 'parent', 'actions'];
 
-  displayedColumnsUsers = ['id', 'displayName', 'team', 'idNo', 'actions'];
+  // ============= Paginators (wired via setters – works with mat-tab lazy load) =============
+  @ViewChild('teamsPaginator', { read: MatPaginator })
+  set teamsPaginator(p: MatPaginator | undefined) {
+    if (p) this.teamsDS.paginator = p;
+  }
 
-  displayedColumnsMainCat = ['id', 'name', 'department', 'team', 'actions'];
+  @ViewChild('departmentsPaginator', { read: MatPaginator })
+  set departmentsPaginator(p: MatPaginator | undefined) {
+    if (p) this.departmentsDS.paginator = p;
+  }
 
-  displayedColumnsSubCat1 = ['id', 'name', 'parent', 'actions'];
-  displayedColumnsSubCat2 = ['id', 'name', 'parent', 'actions'];
-  displayedColumnsSubCat3 = ['id', 'name', 'parent', 'actions'];
+  @ViewChild('statusesPaginator', { read: MatPaginator })
+  set statusesPaginator(p: MatPaginator | undefined) {
+    if (p) this.statusesDS.paginator = p;
+  }
 
-  /* ====== paginators ====== */
-  @ViewChild('teamsPaginator') teamsPaginator!: MatPaginator;
-  @ViewChild('departmentsPaginator') departmentsPaginator!: MatPaginator;
-  @ViewChild('statusesPaginator') statusesPaginator!: MatPaginator;
-  @ViewChild('usersPaginator') usersPaginator!: MatPaginator;
-  @ViewChild('mainCatPaginator') mainCatPaginator!: MatPaginator;
-  @ViewChild('sc1Paginator') sc1Paginator!: MatPaginator;
-  @ViewChild('sc2Paginator') sc2Paginator!: MatPaginator;
-  @ViewChild('sc3Paginator') sc3Paginator!: MatPaginator;
+  @ViewChild('usersPaginator', { read: MatPaginator })
+  set usersPaginator(p: MatPaginator | undefined) {
+    if (p) this.usersDS.paginator = p;
+  }
 
-  /* ====== dialog templates ====== */
-  @ViewChild('simpleEditDialog') simpleEditDialog!: TemplateRef<any>;
-  @ViewChild('userEditDialog') userEditDialog!: TemplateRef<any>;
-  @ViewChild('mainCatEditDialog') mainCatEditDialog!: TemplateRef<any>;
-  @ViewChild('subCatEditDialog') subCatEditDialog!: TemplateRef<any>;
+  @ViewChild('mainCatPaginator', { read: MatPaginator })
+  set mainCatPaginator(p: MatPaginator | undefined) {
+    if (p) this.mainCatDS.paginator = p;
+  }
 
-  /* ====== forms for dialogs ====== */
+  @ViewChild('sc1Paginator', { read: MatPaginator })
+  set sc1Paginator(p: MatPaginator | undefined) {
+    if (p) this.subCat1DS.paginator = p;
+  }
+
+  @ViewChild('sc2Paginator', { read: MatPaginator })
+  set sc2Paginator(p: MatPaginator | undefined) {
+    if (p) this.subCat2DS.paginator = p;
+  }
+
+  // ============= Sorts (also via setters) =============
+  @ViewChild('teamsSort', { read: MatSort })
+  set teamsSort(s: MatSort | undefined) {
+    if (s) this.teamsDS.sort = s;
+  }
+
+  @ViewChild('departmentsSort', { read: MatSort })
+  set departmentsSort(s: MatSort | undefined) {
+    if (s) this.departmentsDS.sort = s;
+  }
+
+  @ViewChild('statusesSort', { read: MatSort })
+  set statusesSort(s: MatSort | undefined) {
+    if (s) this.statusesDS.sort = s;
+  }
+
+  @ViewChild('usersSort', { read: MatSort })
+  set usersSort(s: MatSort | undefined) {
+    if (s) this.usersDS.sort = s;
+  }
+
+  @ViewChild('mainCatSort', { read: MatSort })
+  set mainCatSort(s: MatSort | undefined) {
+    if (s) this.mainCatDS.sort = s;
+  }
+
+  @ViewChild('subCat1Sort', { read: MatSort })
+  set subCat1Sort(s: MatSort | undefined) {
+    if (s) this.subCat1DS.sort = s;
+  }
+
+  @ViewChild('subCat2Sort', { read: MatSort })
+  set subCat2Sort(s: MatSort | undefined) {
+    if (s) this.subCat2DS.sort = s;
+  }
+
+  // dialog templates
+  @ViewChild('simpleEditDialog') simpleEditDialogTpl!: TemplateRef<any>;
+  @ViewChild('userEditDialog') userEditDialogTpl!: TemplateRef<any>;
+  @ViewChild('mainCatEditDialog') mainCatEditDialogTpl!: TemplateRef<any>;
+  @ViewChild('subCatEditDialog') subCatEditDialogTpl!: TemplateRef<any>;
+
+  // forms
   simpleForm!: FormGroup;
-  simpleType: SimpleEntityType | null = null;
-
   userForm!: FormGroup;
   mainCatForm!: FormGroup;
   subCatForm!: FormGroup;
-  subCatLevel: SubCatLevel = 1; // 1/2/3
 
-  private dialogRef?: MatDialogRef<any>;
+  simpleType: SimpleType | null = null;
+  subCatLevel: 1 | 2 | null = null;
+
+  // dropdown search state
+  teamSelectSearch = '';
+  mainCatTeamSelectSearch = '';
+  departmentSelectSearch = '';
+
+  parentSubCat1Search = '';
+  parentMainCatSearch = '';
 
   constructor(
     private http: HttpClient,
     private fb: FormBuilder,
     private dialog: MatDialog
-  ) {
-    // Filter by name columns for tables
-    this.teamsDS.filterPredicate = (data: TeamInCharge, filter: string) =>
-      (data.teamName || '').toLowerCase().includes(filter);
-  
-    this.departmentsDS.filterPredicate = (data: DepartmentInCharge, filter: string) =>
-      (data.departmentName || '').toLowerCase().includes(filter);
-  
-    this.statusesDS.filterPredicate = (data: ServiceCallStatus, filter: string) =>
-      (data.statusName || '').toLowerCase().includes(filter);
-  
-    this.usersDS.filterPredicate = (data: ServiceCallUserInCharge, filter: string) =>
-      ((data.displayName || '') + ' ' + (data.iD_No || '')).toLowerCase().includes(filter);
-  
-    this.mainCatDS.filterPredicate = (data: MainCategory, filter: string) =>
-      (data.name || '').toLowerCase().includes(filter);
-  
-    this.subCat1DS.filterPredicate = (data: SubCategory1, filter: string) =>
-      (data.name || '').toLowerCase().includes(filter);
-  
-    this.subCat2DS.filterPredicate = (data: SubCategory2, filter: string) =>
-      (data.name || '').toLowerCase().includes(filter);
-  }
-  
+  ) {}
 
+  // =========================================
+  // Init
+  // =========================================
   ngOnInit(): void {
+    this.initForms();
+    this.initFilterPredicates();
     this.loadAll();
   }
 
-  ngAfterViewInit(): void {
-    this.teamsDS.paginator = this.teamsPaginator;
-    this.departmentsDS.paginator = this.departmentsPaginator;
-    this.statusesDS.paginator = this.statusesPaginator;
-    this.usersDS.paginator = this.usersPaginator;
-    this.mainCatDS.paginator = this.mainCatPaginator;
-    this.subCat1DS.paginator = this.sc1Paginator;
-    this.subCat2DS.paginator = this.sc2Paginator;
-    //this.subCat3DS.paginator = this.sc3Paginator;
+  private initForms(): void {
+    this.simpleForm = this.fb.group({
+      id: [null],
+      name: ['', Validators.required]
+    });
+
+    this.userForm = this.fb.group({
+      userInChargeID: [null],
+      displayName: ['', Validators.required],
+      iD_No: [''],
+      teamInChargeID: [null]
+    });
+
+    this.mainCatForm = this.fb.group({
+      mainCategoryID: [null],
+      name: ['', Validators.required],
+      departmentInChargeID: [null, Validators.required],
+      teamInChargeID: [null]
+    });
+
+    this.subCatForm = this.fb.group({
+      id: [null],
+      name: ['', Validators.required],
+      parentId: [null, Validators.required]
+    });
   }
 
-  /* =======================================================================
-   *                                 LOAD
-   * ======================================================================= */
+  private initFilterPredicates(): void {
+    const textFilter = <T>(data: T, filter: string): boolean => {
+      const str = JSON.stringify(data);
+      return str.toLowerCase().includes(filter);
+    };
 
+    this.teamsDS.filterPredicate       = textFilter;
+    this.departmentsDS.filterPredicate = textFilter;
+    this.statusesDS.filterPredicate    = textFilter;
+    this.usersDS.filterPredicate       = textFilter;
+    this.mainCatDS.filterPredicate     = textFilter;
+    this.subCat1DS.filterPredicate     = textFilter;
+    this.subCat2DS.filterPredicate     = textFilter;
+  }
+
+  // =========================================
+  // Load all lookup data
+  // =========================================
   loadAll(): void {
     this.isLoading = true;
     this.errorMessage = '';
 
     forkJoin({
-      teams: this.http.get<TeamInCharge[]>(`${this.baseUrl}/Teams`),
-      departments: this.http.get<DepartmentInCharge[]>(`${this.baseUrl}/Departments`),
-      statuses: this.http.get<ServiceCallStatus[]>(`${this.baseUrl}/Statuses`),
-      users: this.http.get<ServiceCallUserInCharge[]>(`${this.baseUrl}/Users`),
-      main: this.http.get<MainCategory[]>(`${this.baseUrl}/MainCategories`),
-      sc1: this.http.get<SubCategory1[]>(`${this.baseUrl}/SubCategory1`),
-      sc2: this.http.get<SubCategory2[]>(`${this.baseUrl}/SubCategory2`),
-    //  sc3: this.http.get<SubCategory3[]>(`${this.baseUrl}/SubCategory3`)
+      teams: this.http.get<TeamModel[]>(`${this.baseUrl}/Teams`),
+      departments: this.http.get<DepartmentModel[]>(`${this.baseUrl}/Departments`),
+      statuses: this.http.get<StatusModel[]>(`${this.baseUrl}/Statuses`),
+      users: this.http.get<UserInChargeModel[]>(`${this.baseUrl}/Users`),
+      mainCats: this.http.get<MainCategoryModel[]>(`${this.baseUrl}/MainCategories`),
+      subCat1: this.http.get<SubCategory1Model[]>(`${this.baseUrl}/SubCategory1`),
+      subCat2: this.http.get<SubCategory2Model[]>(`${this.baseUrl}/SubCategory2`)
     }).subscribe({
-      next: (res) => {
-        this.teamsDS.data = res.teams;
+      next: res => {
+        this.teamsDS.data       = res.teams;
         this.departmentsDS.data = res.departments;
-        this.statusesDS.data = res.statuses;
-        this.usersDS.data = res.users;
-        this.mainCatDS.data = res.main;
-        this.subCat1DS.data = res.sc1;
-        this.subCat2DS.data = res.sc2;
-       //this.subCat3DS.data = res.sc3;
+        this.statusesDS.data    = res.statuses;
+        this.usersDS.data       = res.users;
+        this.mainCatDS.data     = res.mainCats;
+        this.subCat1DS.data     = res.subCat1;
+        this.subCat2DS.data     = res.subCat2;
+        this.isLoading = false;
       },
-      error: (err) => {
+      error: err => {
         console.error(err);
-        this.errorMessage = 'שגיאה בטעינת נתוני קונפיגורציה';
-      },
-      complete: () => (this.isLoading = false)
+        this.errorMessage = 'שגיאה בטעינת נתוני הגדרות';
+        this.isLoading = false;
+      }
     });
   }
 
-  /* =======================================================================
-   *                           SIMPLE ENTITIES
-   * ======================================================================= */
-
-  openAddSimple(type: SimpleEntityType): void {
-    this.simpleType = type;
-    this.simpleForm = this.fb.group({
-      id: [0],
-      name: ['', Validators.required]
-    });
-    this.dialogRef = this.dialog.open(this.simpleEditDialog, {
-      width: '420px'
-    });
+  // =========================================
+  // Table filters
+  // =========================================
+  applyTeamsFilter(value: string): void {
+    this.teamsDS.filter = value.trim().toLowerCase();
+    this.teamsDS.paginator?.firstPage();
   }
 
-  openEditSimple(type: SimpleEntityType, row: any): void {
+  applyDepartmentsFilter(value: string): void {
+    this.departmentsDS.filter = value.trim().toLowerCase();
+    this.departmentsDS.paginator?.firstPage();
+  }
+
+  applyStatusesFilter(value: string): void {
+    this.statusesDS.filter = value.trim().toLowerCase();
+    this.statusesDS.paginator?.firstPage();
+  }
+
+  applyUsersFilter(value: string): void {
+    this.usersDS.filter = value.trim().toLowerCase();
+    this.usersDS.paginator?.firstPage();
+  }
+
+  applyMainCatFilter(value: string): void {
+    this.mainCatDS.filter = value.trim().toLowerCase();
+    this.mainCatDS.paginator?.firstPage();
+  }
+
+  applySubCat1Filter(value: string): void {
+    this.subCat1DS.filter = value.trim().toLowerCase();
+    this.subCat1DS.paginator?.firstPage();
+  }
+
+  applySubCat2Filter(value: string): void {
+    this.subCat2DS.filter = value.trim().toLowerCase();
+    this.subCat2DS.paginator?.firstPage();
+  }
+
+  // =========================================
+  // Lookup name helpers
+  // =========================================
+  getTeamName(id: number | null | undefined): string {
+    if (id == null) return '';
+    const t = this.teamsDS.data.find(x => x.teamInChargeID === id);
+    return t ? t.teamName : '';
+  }
+
+  getDepartmentName(id: number | null | undefined): string {
+    if (id == null) return '';
+    const d = this.departmentsDS.data.find(x => x.departmentInChargeID === id);
+    return d ? d.departmentName : '';
+  }
+
+  getMainCategoryName(id: number | null | undefined): string {
+    if (id == null) return '';
+    let m = this.mainCatDS.data.find(x => x.mainCategoryID === id);
+    if (m) return m.name;
+
+    const s = this.subCat1DS.data.find(x => x.subCategory1ID === id);
+    return s ? s.name : '';
+  }
+
+  // =========================================
+  // Dropdown helper getters
+  // =========================================
+  get filteredTeamsForSelect(): TeamModel[] {
+    const term = this.teamSelectSearch.trim().toLowerCase();
+    if (!term) return this.teamsDS.data;
+    return this.teamsDS.data.filter(t =>
+      t.teamName.toLowerCase().includes(term)
+    );
+  }
+
+  get filteredDepartmentsForSelect(): DepartmentModel[] {
+    const term = this.departmentSelectSearch.trim().toLowerCase();
+    if (!term) return this.departmentsDS.data;
+    return this.departmentsDS.data.filter(d =>
+      d.departmentName.toLowerCase().includes(term)
+    );
+  }
+
+  get filteredSubCat1ForParent(): SubCategory1Model[] {
+    const term = this.parentSubCat1Search.trim().toLowerCase();
+    if (!term) return this.subCat1DS.data;
+    return this.subCat1DS.data.filter(s =>
+      s.name.toLowerCase().includes(term)
+    );
+  }
+
+  get filteredMainCatsForParent(): MainCategoryModel[] {
+    const term = this.parentMainCatSearch.trim().toLowerCase();
+    if (!term) return this.mainCatDS.data;
+    return this.mainCatDS.data.filter(m =>
+      m.name.toLowerCase().includes(term)
+    );
+  }
+
+  // =========================================
+  // Simple entities (team/department/status)
+  // =========================================
+
+  openAddSimple(type: SimpleType): void {
+    this.simpleType = type;
+    this.simpleForm.reset({ id: null, name: '' });
+    this.dialog.open(this.simpleEditDialogTpl, { width: '400px' });
+  }
+
+  openEditSimple(type: SimpleType, row: any): void {
     this.simpleType = type;
 
-    const name =
-      type === 'team'
-        ? row.teamName
-        : type === 'department'
-        ? row.departmentName
-        : row.statusName;
+    let id: number | null = null;
+    let name: string = '';
 
-    const id =
-      type === 'team'
-        ? row.teamInChargeID
-        : type === 'department'
-        ? row.departmentInChargeID
-        : row.statusID;
+    switch (type) {
+      case 'team':
+        id = row.teamInChargeID;
+        name = row.teamName;
+        break;
+      case 'department':
+        id = row.departmentInChargeID;
+        name = row.departmentName;
+        break;
+      case 'status':
+        id = row.statusID;
+        name = row.statusName;
+        break;
+    }
 
-    this.simpleForm = this.fb.group({
-      id: [id],
-      name: [name, Validators.required]
-    });
-
-    this.dialogRef = this.dialog.open(this.simpleEditDialog, {
-      width: '420px'
-    });
+    this.simpleForm.setValue({ id, name });
+    this.dialog.open(this.simpleEditDialogTpl, { width: '400px' });
   }
 
   saveSimple(): void {
-    if (!this.simpleType || this.simpleForm.invalid) {
-      return;
-    }
+    if (!this.simpleType || this.simpleForm.invalid) return;
 
-    const value = this.simpleForm.value;
+    const formValue = this.simpleForm.value;
+    const id = formValue.id;
+    const name = formValue.name;
+
     let url = '';
-    let payload: any = {};
+    let body: any = {};
 
     switch (this.simpleType) {
       case 'team':
         url = `${this.baseUrl}/SaveTeam`;
-        payload = {
-          teamInChargeID: value.id,
-          teamName: value.name
-        };
+        body = { teamInChargeID: id, teamName: name };
         break;
       case 'department':
         url = `${this.baseUrl}/SaveDepartment`;
-        payload = {
-          departmentInChargeID: value.id,
-          departmentName: value.name
-        };
+        body = { departmentInChargeID: id, departmentName: name };
         break;
       case 'status':
         url = `${this.baseUrl}/SaveStatus`;
-        payload = {
-          statusID: value.id,
-          statusName: value.name
-        };
+        body = { statusID: id, statusName: name };
         break;
     }
 
-    this.http.post(url, payload).subscribe({
+    this.http.post(url, body).subscribe({
       next: () => {
-        this.dialogRef?.close();
+        this.dialog.closeAll();
         this.loadAll();
       },
-      error: (err) => {
+      error: err => {
         console.error(err);
-        this.errorMessage = 'שגיאה בשמירת נתונים';
+        this.errorMessage = 'שגיאה בשמירת נתון';
       }
     });
   }
 
-  /* =======================================================================
-   *                               USERS
-   * ======================================================================= */
-
+  // =========================================
+  // UserInCharge
+  // =========================================
   openAddUser(): void {
-    this.userForm = this.fb.group({
-      userInChargeID: [0],
-      displayName: ['', Validators.required],
-      teamInChargeID: [null],
-      iD_No: ['']
+    this.userSelectReset();
+    this.userForm.reset({
+      userInChargeID: null,
+      displayName: '',
+      iD_No: '',
+      teamInChargeID: null
     });
-
-    this.dialogRef = this.dialog.open(this.userEditDialog, {
-      width: '480px'
-    });
+    this.dialog.open(this.userEditDialogTpl, { width: '480px' });
   }
 
-  openEditUser(row: ServiceCallUserInCharge): void {
-    this.userForm = this.fb.group({
-      userInChargeID: [row.userInChargeID],
-      displayName: [row.displayName, Validators.required],
-      teamInChargeID: [row.teamInChargeID],
-      iD_No: [row.iD_No || '']
+  openEditUser(row: UserInChargeModel): void {
+    this.userSelectReset();
+    this.userForm.reset({
+      userInChargeID: row.userInChargeID,
+      displayName: row.displayName,
+      iD_No: row.iD_No,
+      teamInChargeID: row.teamInChargeID
     });
+    this.dialog.open(this.userEditDialogTpl, { width: '480px' });
+  }
 
-    this.dialogRef = this.dialog.open(this.userEditDialog, {
-      width: '480px'
-    });
+  private userSelectReset(): void {
+    this.teamSelectSearch = '';
   }
 
   saveUser(): void {
-    if (this.userForm.invalid) {
-      return;
-    }
+    if (this.userForm.invalid) return;
 
-    const value = this.userForm.value as ServiceCallUserInCharge;
+    const model = this.userForm.value as UserInChargeModel;
 
-    this.http.post(`${this.baseUrl}/SaveUser`, value).subscribe({
+    this.http.post(`${this.baseUrl}/SaveUser`, model).subscribe({
       next: () => {
-        this.dialogRef?.close();
+        this.dialog.closeAll();
         this.loadAll();
       },
-      error: (err) => {
+      error: err => {
         console.error(err);
-        this.errorMessage = 'שגיאה בשמירת משתמש';
+        this.errorMessage =
+          err.error?.exceptionMessage || 'שגיאה בשמירת משתמש אחראי';
       }
     });
   }
 
-  /* =======================================================================
-   *                           MAIN CATEGORY
-   * ======================================================================= */
-
+  // =========================================
+  // MainCategory
+  // =========================================
   openAddMainCategory(): void {
-    this.mainCatForm = this.fb.group({
-      mainCategoryID: [0],
-      name: ['', Validators.required],
-      departmentInChargeID: [
-        this.departmentsDS.data[0]?.departmentInChargeID || null,
-        Validators.required
-      ],
-      teamInChargeID: [
-        this.teamsDS.data[0]?.teamInChargeID || null,
-        Validators.required
-      ]
+    this.departmentSelectSearch = '';
+    this.mainCatTeamSelectSearch = '';
+
+    this.mainCatForm.reset({
+      mainCategoryID: null,
+      name: '',
+      departmentInChargeID: null,
+      teamInChargeID: null
     });
 
-    this.dialogRef = this.dialog.open(this.mainCatEditDialog, {
-      width: '520px'
-    });
+    this.dialog.open(this.mainCatEditDialogTpl, { width: '500px' });
   }
 
-  openEditMainCategory(row: MainCategory): void {
-    this.mainCatForm = this.fb.group({
-      mainCategoryID: [row.mainCategoryID],
-      name: [row.name, Validators.required],
-      departmentInChargeID: [row.departmentInChargeID, Validators.required],
-      teamInChargeID: [row.teamInChargeID, Validators.required]
+  openEditMainCategory(row: MainCategoryModel): void {
+    this.departmentSelectSearch = '';
+    this.mainCatTeamSelectSearch = '';
+
+    this.mainCatForm.reset({
+      mainCategoryID: row.mainCategoryID,
+      name: row.name,
+      departmentInChargeID: row.departmentInChargeID,
+      teamInChargeID: row.teamInChargeID
     });
 
-    this.dialogRef = this.dialog.open(this.mainCatEditDialog, {
-      width: '520px'
-    });
+    this.dialog.open(this.mainCatEditDialogTpl, { width: '500px' });
   }
 
   saveMainCategory(): void {
-    if (this.mainCatForm.invalid) {
-      return;
-    }
+    if (this.mainCatForm.invalid) return;
 
-    const value = this.mainCatForm.value as MainCategory;
+    const model = this.mainCatForm.value as MainCategoryModel;
 
-    this.http.post(`${this.baseUrl}/SaveMainCategory`, value).subscribe({
+    this.http.post(`${this.baseUrl}/SaveMainCategory`, model).subscribe({
       next: () => {
-        this.dialogRef?.close();
+        this.dialog.closeAll();
         this.loadAll();
       },
-      error: (err) => {
+      error: err => {
         console.error(err);
-        this.errorMessage = 'שגיאה בשמירת קטגוריה';
+        this.errorMessage = 'שגיאה בשמירת קטגוריה ראשית';
       }
     });
   }
 
-  /* =======================================================================
-   *                            SUBCATEGORIES
-   * ======================================================================= */
+  // =========================================
+  // SubCategory 1/2
+  // =========================================
 
-  openAddSubCategory(level: SubCatLevel): void {
+  openAddSubCategory(level: 1 | 2): void {
     this.subCatLevel = level;
+    this.parentSubCat1Search = '';
+    this.parentMainCatSearch  = '';
 
-    const base: any =
-      level === 1
-        ? { subCategory1ID: 0, mainCategoryID: this.mainCatDS.data[0]?.mainCategoryID || null }
-        : level === 2
-        ? { subCategory2ID: 0, subCategory1ID: this.subCat1DS.data[0]?.subCategory1ID || null }
-        : { subCategory3ID: 0, mainCategoryID: this.mainCatDS.data[0]?.mainCategoryID || null };
-
-    this.buildSubCatForm(base);
-    this.dialogRef = this.dialog.open(this.subCatEditDialog, {
-      width: '480px'
+    this.subCatForm.reset({
+      id: null,
+      name: '',
+      parentId: null
     });
+
+    this.dialog.open(this.subCatEditDialogTpl, { width: '500px' });
   }
 
-  openEditSubCategory(level: SubCatLevel, row: any): void {
+  openEditSubCategory(level: 1 | 2, row: any): void {
     this.subCatLevel = level;
-    this.buildSubCatForm(row);
-    this.dialogRef = this.dialog.open(this.subCatEditDialog, {
-      width: '480px'
-    });
-  }
+    this.parentSubCat1Search = '';
+    this.parentMainCatSearch  = '';
 
-  private buildSubCatForm(row: any): void {
-    if (this.subCatLevel === 1) {
-      this.subCatForm = this.fb.group({
-        id: [row.subCategory1ID],
-        name: [row.name, Validators.required],
-        parentId: [row.mainCategoryID, Validators.required]
-      });
-    } else if (this.subCatLevel === 2) {
-      this.subCatForm = this.fb.group({
-        id: [row.subCategory2ID],
-        name: [row.name, Validators.required],
-        parentId: [row.subCategory1ID, Validators.required]
+    if (level === 1) {
+      this.subCatForm.reset({
+        id: row.subCategory1ID,
+        name: row.name,
+        parentId: row.mainCategoryID
       });
     } else {
-      this.subCatForm = this.fb.group({
-        id: [row.subCategory3ID],
-        name: [row.name, Validators.required],
-        parentId: [row.mainCategoryID, Validators.required]
+      this.subCatForm.reset({
+        id: row.subCategory2ID,
+        name: row.name,
+        parentId: row.subCategory1ID
       });
     }
+
+    this.dialog.open(this.subCatEditDialogTpl, { width: '500px' });
   }
 
   saveSubCategory(): void {
-    if (this.subCatForm.invalid) return;
+    if (this.subCatForm.invalid || !this.subCatLevel) return;
 
-    const value = this.subCatForm.value;
+    const formVal = this.subCatForm.value;
     let url = '';
-    let payload: any = {};
+    let body: any = {};
 
     if (this.subCatLevel === 1) {
       url = `${this.baseUrl}/SaveSubCategory1`;
-      payload = {
-        subCategory1ID: value.id,
-        name: value.name,
-        mainCategoryID: value.parentId
-      } as SubCategory1;
-    } else if (this.subCatLevel === 2) {
+      body = {
+        subCategory1ID: formVal.id,
+        name: formVal.name,
+        mainCategoryID: formVal.parentId
+      };
+    } else {
       url = `${this.baseUrl}/SaveSubCategory2`;
-      payload = {
-        subCategory2ID: value.id,
-        name: value.name,
-        subCategory1ID: value.parentId
-      } as SubCategory2;
-    } 
-    this.http.post(url, payload).subscribe({
+      body = {
+        subCategory2ID: formVal.id,
+        name: formVal.name,
+        subCategory1ID: formVal.parentId
+      };
+    }
+
+    this.http.post(url, body).subscribe({
       next: () => {
-        this.dialogRef?.close();
+        this.dialog.closeAll();
         this.loadAll();
       },
-      error: (err) => {
+      error: err => {
         console.error(err);
         this.errorMessage = 'שגיאה בשמירת תת קטגוריה';
       }
     });
   }
-
-  /* =======================================================================
-   *                             HELPERS
-   * ======================================================================= */
-
-  getTeamName(id: number | null): string {
-    if (!id) return '';
-    const t = this.teamsDS.data.find((x) => x.teamInChargeID === id);
-    return t ? t.teamName : '';
-  }
-
-  getDepartmentName(id: number | null): string {
-    if (!id) return '';
-    const d = this.departmentsDS.data.find(
-      (x) => x.departmentInChargeID === id
-    );
-    return d ? d.departmentName : '';
-  }
-
-  getMainCategoryName(id: number | null): string {
-    if (!id) return '';
-    const m = this.mainCatDS.data.find((x) => x.mainCategoryID === id);
-    return m ? m.name : '';
-  }
-  // ===== table filter methods =====
-applyTeamsFilter(value: string): void {
-  this.teamsFilter = (value || '').trim().toLowerCase();
-  this.teamsDS.filter = this.teamsFilter;
-}
-
-applyDepartmentsFilter(value: string): void {
-  this.departmentsFilter = (value || '').trim().toLowerCase();
-  this.departmentsDS.filter = this.departmentsFilter;
-}
-
-applyStatusesFilter(value: string): void {
-  this.statusesFilter = (value || '').trim().toLowerCase();
-  this.statusesDS.filter = this.statusesFilter;
-}
-
-applyUsersFilter(value: string): void {
-  this.usersFilter = (value || '').trim().toLowerCase();
-  this.usersDS.filter = this.usersFilter;
-}
-
-applyMainCatFilter(value: string): void {
-  this.mainCatFilter = (value || '').trim().toLowerCase();
-  this.mainCatDS.filter = this.mainCatFilter;
-}
-
-applySubCat1Filter(value: string): void {
-  this.subCat1Filter = (value || '').trim().toLowerCase();
-  this.subCat1DS.filter = this.subCat1Filter;
-}
-
-applySubCat2Filter(value: string): void {
-  this.subCat2Filter = (value || '').trim().toLowerCase();
-  this.subCat2DS.filter = this.subCat2Filter;
-}
-// ===== filtered lists for dropdowns in dialogs =====
-get filteredTeamsForSelect(): TeamInCharge[] {
-  const f = (this.teamSelectSearch || '').toLowerCase();
-  if (!f) return this.teamsDS.data;
-  return this.teamsDS.data.filter(t => (t.teamName || '').toLowerCase().includes(f));
-}
-
-get filteredDepartmentsForSelect(): DepartmentInCharge[] {
-  const f = (this.departmentSelectSearch || '').toLowerCase();
-  if (!f) return this.departmentsDS.data;
-  return this.departmentsDS.data.filter(d => (d.departmentName || '').toLowerCase().includes(f));
-}
-
-get filteredMainCatsForSelect(): MainCategory[] {
-  const f = (this.mainCatSelectSearch || '').toLowerCase();
-  if (!f) return this.mainCatDS.data;
-  return this.mainCatDS.data.filter(m => (m.name || '').toLowerCase().includes(f));
-}
-
-get filteredMainCatsForParent(): MainCategory[] {
-  const f = (this.parentMainCatSearch || '').toLowerCase();
-  if (!f) return this.mainCatDS.data;
-  return this.mainCatDS.data.filter(m => (m.name || '').toLowerCase().includes(f));
-}
-
-get filteredSubCat1ForParent(): SubCategory1[] {
-  const f = (this.parentSubCat1Search || '').toLowerCase();
-  if (!f) return this.subCat1DS.data;
-  return this.subCat1DS.data.filter(s => (s.name || '').toLowerCase().includes(f));
-}
-
 }
