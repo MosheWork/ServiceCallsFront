@@ -1,72 +1,56 @@
+<div class="service-call-page" *ngIf="!isLoading" dir="rtl">
 
-<div dir="rtl" class="sc-edit-page" *ngIf="!isLoading">
-  <mat-card>
-    <mat-card-title>עריכת קריאת שירות #{{ callId }}</mat-card-title>
+  <!-- כרטיס כותרת עליון -->
+  <div class="sc-card sc-header-card">
+    <h1>קריאת שירות {{ callId }}</h1>
+  </div>
 
-    <div *ngIf="errorMessage" class="error-msg">{{ errorMessage }}</div>
+  <form [formGroup]="form" (ngSubmit)="save()">
 
-    <form [formGroup]="form" class="sc-edit-form">
+    <!-- ===== כרטיס: שיוך וסטטוסים ===== -->
+    <div class="sc-card">
+      <div class="sc-card-title">שיוך וסטטוסים</div>
 
-      <div class="sc-edit-grid">
+      <div class="sc-grid sc-grid-3">
 
-        <mat-form-field appearance="outline">
-          <mat-label>כותרת</mat-label>
-          <input matInput formControlName="title">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>מבקש</mat-label>
-          <input matInput formControlName="requestUser">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>טלפון לחזרה</mat-label>
-          <input matInput formControlName="callbackPhone">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>מיקום</mat-label>
-          <input matInput formControlName="location">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>שם מחשב</mat-label>
-          <input matInput formControlName="computerName">
-        </mat-form-field>
-
-        <!-- קטגוריות -->
+        <!-- קטגוריה ראשית -->
         <mat-form-field appearance="outline">
           <mat-label>קטגוריה ראשית</mat-label>
-          <mat-select formControlName="mainCategoryID"
-                      (selectionChange)="onMainCategoryChange($event.value)">
-            <mat-option [value]="null">הכל</mat-option>
+          <mat-select
+            formControlName="mainCategoryID"
+            (selectionChange)="onMainCategoryChange($event.value)">
+            <mat-option [value]="null">ללא</mat-option>
             <mat-option *ngFor="let c of mainCategories" [value]="c.id">
               {{ c.name }}
             </mat-option>
           </mat-select>
         </mat-form-field>
 
+        <!-- קטגוריה 1 -->
         <mat-form-field appearance="outline">
           <mat-label>קטגוריה 1</mat-label>
-          <mat-select formControlName="subCategory1ID"
-                      (selectionChange)="onSubCategory1Change($event.value)">
-            <mat-option [value]="null">הכל</mat-option>
+          <mat-select
+            formControlName="subCategory1ID"
+            (selectionChange)="onSubCategory1Change($event.value)">
+            <mat-option [value]="null">ללא</mat-option>
             <mat-option *ngFor="let c of sub1" [value]="c.id">
               {{ c.name }}
             </mat-option>
           </mat-select>
         </mat-form-field>
 
+        <!-- קטגוריה 2 -->
         <mat-form-field appearance="outline">
           <mat-label>קטגוריה 2</mat-label>
           <mat-select formControlName="subCategory2ID">
-            <mat-option [value]="null">הכל</mat-option>
+            <mat-option [value]="null">ללא</mat-option>
             <mat-option *ngFor="let c of sub2" [value]="c.id">
               {{ c.name }}
             </mat-option>
           </mat-select>
         </mat-form-field>
 
+        <!-- סטטוס -->
         <mat-form-field appearance="outline">
           <mat-label>סטטוס</mat-label>
           <mat-select formControlName="statusID">
@@ -77,6 +61,7 @@
           </mat-select>
         </mat-form-field>
 
+        <!-- עדיפות -->
         <mat-form-field appearance="outline">
           <mat-label>עדיפות</mat-label>
           <mat-select formControlName="priorityID">
@@ -86,46 +71,121 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
-<!-- צוות אחראי -->
-<mat-form-field  class="full-width">
-  <mat-label>צוות אחראי</mat-label>
-  <mat-select formControlName="teamInChargeID" (selectionChange)="onTeamInChargeChange($event.value)">
-    <mat-option [value]="null">-- ללא --</mat-option>
-    <mat-option *ngFor="let t of teams" [value]="t.id">
-      {{ t.name }}
-    </mat-option>
-  </mat-select>
-</mat-form-field>
 
-<!-- משתמש אחראי -->
-<mat-form-field class="full-width">
-  <mat-label>משתמש אחראי</mat-label>
-  <mat-select formControlName="userInChargeID" (selectionChange)="onUserInChargeChange($event.value)">
-    <mat-option [value]="null">-- ללא --</mat-option>
-    <mat-option *ngFor="let u of usersFiltered" [value]="u.userInChargeID">
-      {{ u.displayName }}
-    </mat-option>
-  </mat-select>
-</mat-form-field>
+        <!-- צוות אחראי -->
+        <mat-form-field appearance="outline">
+          <mat-label>צוות אחראי</mat-label>
+          <mat-select
+            formControlName="teamInChargeID"
+            (selectionChange)="onTeamInChargeChange($event.value)">
+            <mat-option [value]="null">-- ללא --</mat-option>
+            <mat-option *ngFor="let t of teams" [value]="t.id">
+              {{ t.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
 
-<mat-form-field  class="full-width">
-  <mat-label>פתרון / סיכום טיפול</mat-label>
-  <textarea matInput rows="4" formControlName="solutionText"></textarea>
-</mat-form-field>
+        <!-- משתמש אחראי -->
+        <mat-form-field appearance="outline">
+          <mat-label>משתמש אחראי</mat-label>
+          <mat-select
+            formControlName="userInChargeID"
+            (selectionChange)="onUserInChargeChange($event.value)">
+            <mat-option [value]="null">-- ללא --</mat-option>
+            <mat-option *ngFor="let u of usersFiltered" [value]="u.userInChargeID">
+              {{ u.displayName }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
 
       </div>
+    </div>
 
-      <mat-form-field class="full-width" >
-        <mat-label>תיאור</mat-label>
-        <textarea matInput rows="4" formControlName="description"></textarea>
+    <!-- ===== כרטיס מפוצל: ימין פותח הקריאה / שמאל פרטי הקריאה ===== -->
+    <div class="sc-card sc-split-card">
+
+      <!-- צד ימין: פרטי פותח הקריאה -->
+      <div class="split-col split-col-right">
+        <div class="sc-card-title sc-card-title-small">
+          פרטי פותח הקריאה – מבקש / טלפון לחזרה / מיקום / שם מחשב
+        </div>
+
+        <div class="sc-grid sc-grid-1">
+
+          <!-- מבקש -->
+          <mat-form-field appearance="outline" class="full-width readonly-field">
+            <mat-label>מבקש</mat-label>
+            <input matInput formControlName="requestUser" readonly>
+          </mat-form-field>
+
+          <!-- טלפון לחזרה -->
+          <mat-form-field appearance="outline" class="full-width readonly-field">
+            <mat-label>טלפון לחזרה</mat-label>
+            <input matInput formControlName="callbackPhone" readonly>
+          </mat-form-field>
+
+          <!-- מיקום -->
+          <mat-form-field appearance="outline" class="full-width readonly-field">
+            <mat-label>מיקום</mat-label>
+            <input matInput formControlName="location" readonly>
+          </mat-form-field>
+
+          <!-- שם מחשב -->
+          <mat-form-field appearance="outline" class="full-width readonly-field">
+            <mat-label>שם מחשב</mat-label>
+            <input matInput formControlName="computerName" readonly>
+          </mat-form-field>
+
+        </div>
+      </div>
+
+      <!-- צד שמאל: פרטי הקריאה – כותרת + תיאור -->
+      <div class="split-col split-col-left">
+        <div class="sc-card-title sc-card-title-small">
+          פרטי הקריאה – כותרת / תיאור התקלה
+        </div>
+
+        <div class="sc-grid sc-grid-1">
+
+          <!-- כותרת הקריאה -->
+          <mat-form-field appearance="outline" class="full-width readonly-field">
+            <mat-label>כותרת הקריאה</mat-label>
+            <input matInput formControlName="title" readonly>
+          </mat-form-field>
+
+          <!-- תיאור התקלה -->
+          <mat-form-field appearance="outline" class="full-width readonly-field">
+            <mat-label>תיאור התקלה</mat-label>
+            <textarea matInput rows="4" formControlName="description" readonly></textarea>
+          </mat-form-field>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ===== כרטיס: פתרון / סיכום טיפול ===== -->
+    <div class="sc-card">
+      <div class="sc-card-title">פתרון סיכום טיפול</div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>פתרון / סיכום טיפול</mat-label>
+        <textarea matInput rows="4" formControlName="solutionText"></textarea>
       </mat-form-field>
+    </div>
 
-      <div class="actions">
-        <button mat-raised-button color="primary" (click)="save()">שמירה</button>
-        <button mat-button type="button" (click)="cancel()">ביטול</button>
-      </div>
+    <!-- כפתורים -->
+    <div class="sc-actions">
+      <button mat-button type="button" (click)="cancel()">ביטול</button>
+      <button mat-raised-button color="primary" type="submit">
+        שמירה
+      </button>
+    </div>
 
+    <!-- שגיאה כללית -->
+    <div *ngIf="errorMessage" class="message error">
+      {{ errorMessage }}
+    </div>
 
-    </form>
-  </mat-card>
+  </form>
 </div>
