@@ -76,7 +76,21 @@ export class ServiceCallsAdminConfigComponent implements OnInit, AfterViewInit {
   errorMessage = '';
 
   private baseUrl = `${environment.apiBaseUrl}/ServiceCallsAdminConfig`;
+ // table search strings
+ teamsFilter = '';
+ departmentsFilter = '';
+ statusesFilter = '';
+ usersFilter = '';
+ mainCatFilter = '';
+ subCat1Filter = '';
+ subCat2Filter = '';
 
+ // dropdown search strings (dialogs)
+ teamSelectSearch = '';
+ departmentSelectSearch = '';
+ mainCatSelectSearch = '';
+ parentMainCatSearch = '';
+ parentSubCat1Search = '';
   /* ====== data sources ====== */
   teamsDS = new MatTableDataSource<TeamInCharge>([]);
   departmentsDS = new MatTableDataSource<DepartmentInCharge>([]);
@@ -131,7 +145,30 @@ export class ServiceCallsAdminConfigComponent implements OnInit, AfterViewInit {
     private http: HttpClient,
     private fb: FormBuilder,
     private dialog: MatDialog
-  ) {}
+  ) {
+    // Filter by name columns for tables
+    this.teamsDS.filterPredicate = (data: TeamInCharge, filter: string) =>
+      (data.teamName || '').toLowerCase().includes(filter);
+  
+    this.departmentsDS.filterPredicate = (data: DepartmentInCharge, filter: string) =>
+      (data.departmentName || '').toLowerCase().includes(filter);
+  
+    this.statusesDS.filterPredicate = (data: ServiceCallStatus, filter: string) =>
+      (data.statusName || '').toLowerCase().includes(filter);
+  
+    this.usersDS.filterPredicate = (data: ServiceCallUserInCharge, filter: string) =>
+      ((data.displayName || '') + ' ' + (data.iD_No || '')).toLowerCase().includes(filter);
+  
+    this.mainCatDS.filterPredicate = (data: MainCategory, filter: string) =>
+      (data.name || '').toLowerCase().includes(filter);
+  
+    this.subCat1DS.filterPredicate = (data: SubCategory1, filter: string) =>
+      (data.name || '').toLowerCase().includes(filter);
+  
+    this.subCat2DS.filterPredicate = (data: SubCategory2, filter: string) =>
+      (data.name || '').toLowerCase().includes(filter);
+  }
+  
 
   ngOnInit(): void {
     this.loadAll();
@@ -482,4 +519,70 @@ export class ServiceCallsAdminConfigComponent implements OnInit, AfterViewInit {
     const m = this.mainCatDS.data.find((x) => x.mainCategoryID === id);
     return m ? m.name : '';
   }
+  // ===== table filter methods =====
+applyTeamsFilter(value: string): void {
+  this.teamsFilter = (value || '').trim().toLowerCase();
+  this.teamsDS.filter = this.teamsFilter;
+}
+
+applyDepartmentsFilter(value: string): void {
+  this.departmentsFilter = (value || '').trim().toLowerCase();
+  this.departmentsDS.filter = this.departmentsFilter;
+}
+
+applyStatusesFilter(value: string): void {
+  this.statusesFilter = (value || '').trim().toLowerCase();
+  this.statusesDS.filter = this.statusesFilter;
+}
+
+applyUsersFilter(value: string): void {
+  this.usersFilter = (value || '').trim().toLowerCase();
+  this.usersDS.filter = this.usersFilter;
+}
+
+applyMainCatFilter(value: string): void {
+  this.mainCatFilter = (value || '').trim().toLowerCase();
+  this.mainCatDS.filter = this.mainCatFilter;
+}
+
+applySubCat1Filter(value: string): void {
+  this.subCat1Filter = (value || '').trim().toLowerCase();
+  this.subCat1DS.filter = this.subCat1Filter;
+}
+
+applySubCat2Filter(value: string): void {
+  this.subCat2Filter = (value || '').trim().toLowerCase();
+  this.subCat2DS.filter = this.subCat2Filter;
+}
+// ===== filtered lists for dropdowns in dialogs =====
+get filteredTeamsForSelect(): TeamInCharge[] {
+  const f = (this.teamSelectSearch || '').toLowerCase();
+  if (!f) return this.teamsDS.data;
+  return this.teamsDS.data.filter(t => (t.teamName || '').toLowerCase().includes(f));
+}
+
+get filteredDepartmentsForSelect(): DepartmentInCharge[] {
+  const f = (this.departmentSelectSearch || '').toLowerCase();
+  if (!f) return this.departmentsDS.data;
+  return this.departmentsDS.data.filter(d => (d.departmentName || '').toLowerCase().includes(f));
+}
+
+get filteredMainCatsForSelect(): MainCategory[] {
+  const f = (this.mainCatSelectSearch || '').toLowerCase();
+  if (!f) return this.mainCatDS.data;
+  return this.mainCatDS.data.filter(m => (m.name || '').toLowerCase().includes(f));
+}
+
+get filteredMainCatsForParent(): MainCategory[] {
+  const f = (this.parentMainCatSearch || '').toLowerCase();
+  if (!f) return this.mainCatDS.data;
+  return this.mainCatDS.data.filter(m => (m.name || '').toLowerCase().includes(f));
+}
+
+get filteredSubCat1ForParent(): SubCategory1[] {
+  const f = (this.parentSubCat1Search || '').toLowerCase();
+  if (!f) return this.subCat1DS.data;
+  return this.subCat1DS.data.filter(s => (s.name || '').toLowerCase().includes(f));
+}
+
 }
