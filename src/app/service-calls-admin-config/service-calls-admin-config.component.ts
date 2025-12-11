@@ -34,7 +34,7 @@ export interface ServiceCallUserInCharge {
   userInChargeID: number;
   displayName: string;
   teamInChargeID: number | null;
-  ID_No?: string | null;
+  iD_No?: string | null;
 }
 
 export interface MainCategory {
@@ -280,7 +280,7 @@ export class ServiceCallsAdminConfigComponent implements OnInit, AfterViewInit {
       userInChargeID: [0],
       displayName: ['', Validators.required],
       teamInChargeID: [null],
-      ID_No: ['']
+      iD_No: ['']
     });
 
     this.dialogRef = this.dialog.open(this.userEditDialog, {
@@ -293,7 +293,7 @@ export class ServiceCallsAdminConfigComponent implements OnInit, AfterViewInit {
       userInChargeID: [row.userInChargeID],
       displayName: [row.displayName, Validators.required],
       teamInChargeID: [row.teamInChargeID],
-      ID_No: [row.ID_No || '']
+      iD_No: [row.iD_No || '']
     });
 
     this.dialogRef = this.dialog.open(this.userEditDialog, {
