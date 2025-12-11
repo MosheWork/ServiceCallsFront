@@ -25,6 +25,11 @@ import { MatDividerModule } from '@angular/material/divider';
 import { CommonModule } from '@angular/common';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { ServiceCallsAdminConfigComponent } from './service-calls-admin-config/service-calls-admin-config.component';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatDialogModule } from '@angular/material/dialog';
+
+
 
 
 @NgModule({
@@ -32,7 +37,8 @@ import { MatNativeDateModule } from '@angular/material/core';
     AppComponent,
     ServiceCallFormComponent,
     ServiceCallListComponent,
-    ServiceCallEditComponent
+    ServiceCallEditComponent,
+    ServiceCallsAdminConfigComponent
   ],
   imports: [
     BrowserModule,
@@ -56,7 +62,9 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatDividerModule,
     CommonModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatTabsModule,
+    MatDialogModule
   ],
   providers: [],
   bootstrap: [AppComponent]
