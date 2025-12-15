@@ -230,4 +230,29 @@
     opacity: 0.65;
     margin-top: 4px;
   }
+  .scd-graphs-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+  
+    @media (max-width: 1100px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .scd-graph-card {
+    padding: 1rem 1rem 1.25rem 1rem;
+    border-radius: 14px;
+  }
+  
+  .scd-card-title {
+    font-weight: 900;
+    margin-bottom: 0.75rem;
+  }
+  
+  .scd-chart-wrap {
+    height: 360px;     // adjust if you want taller/shorter
+    padding: 0.5rem;   // inner padding around canvas
+  }
   

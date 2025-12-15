@@ -89,9 +89,7 @@
   </mat-card>
 
 
-  <!-- =========================
-       2) KPI / SUMMARY CARD
-       ========================= -->
+
  <!-- =========================
      KPI / SUMMARY CARD
      ========================= -->
@@ -173,33 +171,28 @@
   </mat-card>
   
 
-  <!-- =========================
-       3) GRAPHS CARD
-       ========================= -->
-  <mat-card class="scd-graphs-card">
+<!-- =========================
+     GRAPHS (2 cards in same row)
+     ========================= -->
+     <div class="scd-graphs-row" dir="rtl">
 
-    <div class="scd-card-title">גרפים</div>
-
-    <div class="scd-chart-row">
-
-      <div class="scd-chart-col">
-        <div class="scd-chart-title">לפי קטגוריה ראשית</div>
-        <div class="scd-chart-wrap">
-          <canvas #mainBarCanvas></canvas>
-        </div>
+        <!-- MAIN CATEGORY GRAPH -->
+        <mat-card class="scd-graph-card">
+          <div class="scd-card-title">לפי קטגוריה ראשית</div>
+          <div class="scd-chart-wrap">
+            <canvas #mainBarCanvas></canvas>
+          </div>
+        </mat-card>
+      
+        <!-- SUBCATEGORY 1 GRAPH -->
+        <mat-card class="scd-graph-card">
+          <div class="scd-card-title">לפי תת-קטגוריה 1</div>
+          <div class="scd-chart-wrap">
+            <canvas #sub1BarCanvas></canvas>
+          </div>
+        </mat-card>
+      
       </div>
-
-      <div class="scd-chart-col">
-        <div class="scd-chart-title">לפי תת-קטגוריה 1</div>
-        <div class="scd-chart-wrap">
-          <canvas #sub1BarCanvas></canvas>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="scd-overlay error" *ngIf="errorMessage">{{ errorMessage }}</div>
-
-  </mat-card>
+      
 
 </div>

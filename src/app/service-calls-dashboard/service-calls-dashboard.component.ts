@@ -374,14 +374,17 @@ export class ServiceCallsDashboardComponent implements OnInit, AfterViewInit, On
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: { display: true }
-          },
+          plugins: { legend: { display: true } },
           scales: {
-            y: { beginAtZero: true, ticks: { precision: 0 } },
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0 },
+              suggestedMax: 1  // will be overwritten on update
+            },
             x: { ticks: { autoSkip: false } }
           }
-        },
+        }
+        ,
         plugins: [this.valueLabelPlugin] // ✅ numbers on top
       };
       this.mainChart = new Chart(this.mainBarCanvas.nativeElement, cfg);
@@ -479,7 +482,11 @@ export class ServiceCallsDashboardComponent implements OnInit, AfterViewInit, On
 
     const labels = sorted.map(x => x[0]);
     const values = sorted.map(x => x[1]);
-
+    const yMax = this.getNiceYAxisMax(values);
+    (this.mainChart.options.scales as any).y.suggestedMax = yMax;
+    (this.mainChart.options.scales as any).y.max = yMax;   // force
+    this.mainChart.update();
+    
     const colors = labels.map(l => this.hexToRgba(this.getColorForMain(l), 0.55));
 
     this.mainChart.data.labels = labels;
@@ -511,7 +518,11 @@ export class ServiceCallsDashboardComponent implements OnInit, AfterViewInit, On
 
     const labels = sorted.map(x => x[0]);
     const values = sorted.map(x => x[1]);
-
+    const yMax = this.getNiceYAxisMax(values);
+    (this.sub1Chart.options.scales as any).y.suggestedMax = yMax;
+    (this.sub1Chart.options.scales as any).y.max = yMax;   // force
+    this.sub1Chart.update();
+    
     const colors = labels.map(lbl => {
       if (selectedSub1.length === 0) return this.hexToRgba('#6AA9FF', 0.55);
       return selectedSub1.includes(this.norm(lbl))
@@ -610,4 +621,9 @@ export class ServiceCallsDashboardComponent implements OnInit, AfterViewInit, On
     if (v <= 200) return Math.ceil(v * 1.2 / 25) * 25;
     return Math.ceil(v * 1.15 / 100) * 100;
   }
+  private getNiceYAxisMax(values: number[]): number {
+    const max = Math.max(0, ...(values || []));
+    return max + 1; // exactly +1 as you asked
+  }
+  
 }
