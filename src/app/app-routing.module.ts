@@ -4,6 +4,7 @@ import { ServiceCallEditComponent } from './service-call-edit/service-call-edit.
 import { ServiceCallFormComponent } from './service-call-form/service-call-form.component';
 import { ServiceCallListComponent } from './service-call-list/service-call-list.component';
 import { ServiceCallsAdminConfigComponent } from './service-calls-admin-config/service-calls-admin-config.component';
+import { ServiceCallsDashboardComponent } from './service-calls-dashboard/service-calls-dashboard.component';
 // אם יצרת בתיקייה אחרת – עדכן את ה-path בהתאם
 
 const routes: Routes = [
@@ -14,6 +15,8 @@ const routes: Routes = [
   { path: 'service-call-list', component: ServiceCallListComponent },
   { path: 'service-calls/:id', component: ServiceCallEditComponent } ,
   { path: 'ServiceCallsAdminConfig', component: ServiceCallsAdminConfigComponent } ,
+  { path: 'serviceCallsDashboard', component: ServiceCallsDashboardComponent } ,
+
 
   // אופציונלי – דף 404
   { path: '**', redirectTo: 'service-call-list' }

@@ -1,0 +1,48 @@
+<div class="scd-body" dir="rtl">
+
+    <mat-card class="scd-filter-card">
+      <div class="scd-title">דשבורד קריאות שירות</div>
+  
+      <form [formGroup]="filterForm" class="scd-filter-form">
+  
+        <mat-form-field appearance="outline">
+          <mat-label>טווח תאריכים</mat-label>
+          <mat-date-range-input [rangePicker]="picker">
+            <input matStartDate formControlName="startDate" placeholder="מתאריך">
+            <input matEndDate formControlName="endDate" placeholder="עד תאריך">
+          </mat-date-range-input>
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-date-range-picker #picker></mat-date-range-picker>
+        </mat-form-field>
+  
+        <mat-form-field appearance="outline">
+          <mat-label>קטגוריה ראשית</mat-label>
+          <mat-select formControlName="mainCategoryName">
+            <mat-option value="ALL">הכל</mat-option>
+            <mat-option *ngFor="let c of mainCategories" [value]="c">{{ c }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+  
+        <div class="scd-actions">
+          <button mat-stroked-button type="button" (click)="clearFilters()">נקה פילטרים</button>
+        </div>
+  
+      </form>
+    </mat-card>
+    <mat-card class="scd-chart-card">
+        <div class="scd-chart-header">
+          <div class="scd-chart-title">גרף לפי קטגוריה ראשית</div>
+          <div class="scd-chip">סה"כ אחרי פילטר: {{ filteredRows.length }}</div>
+        </div>
+      
+        <div class="scd-chart-wrap">
+          <canvas #barCanvas></canvas>
+      
+          <div class="scd-overlay" *ngIf="isLoading">טוען נתונים...</div>
+          <div class="scd-overlay error" *ngIf="!isLoading && errorMessage">{{ errorMessage }}</div>
+        </div>
+      </mat-card>
+      
+  
+  </div>
+  

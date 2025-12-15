@@ -28,6 +28,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { ServiceCallsAdminConfigComponent } from './service-calls-admin-config/service-calls-admin-config.component';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialogModule } from '@angular/material/dialog';
+import { ServiceCallsDashboardComponent } from './service-calls-dashboard/service-calls-dashboard.component';
 
 
 
@@ -38,7 +39,8 @@ import { MatDialogModule } from '@angular/material/dialog';
     ServiceCallFormComponent,
     ServiceCallListComponent,
     ServiceCallEditComponent,
-    ServiceCallsAdminConfigComponent
+    ServiceCallsAdminConfigComponent,
+    ServiceCallsDashboardComponent
   ],
   imports: [
     BrowserModule,

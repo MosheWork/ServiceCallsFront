@@ -1,0 +1,102 @@
+.scd-body {
+    max-width: 1200px;
+    margin: 1.25rem auto;
+    padding: 0 1rem;
+    direction: rtl;
+    text-align: right;
+  }
+  
+  .scd-filter-card {
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #f5f7ff 0%, #ffffff 70%);
+    border-inline-start: 4px solid #1976d2;
+  }
+  
+  .scd-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: #1a237e;
+  }
+  
+  .scd-filter-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 0.75rem;
+    align-items: end;
+  
+    @media (max-width: 900px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .scd-actions {
+    display: flex;
+    justify-content: flex-start;
+    padding-bottom: 0.25rem;
+  
+    button {
+      min-width: 140px;
+    }
+  }
+  
+  .scd-chart-card {
+    padding: 1rem 1.25rem;
+    border-radius: 12px;
+  }
+  
+  .scd-chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  
+    @media (max-width: 900px) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+  
+  .scd-chart-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  
+  .scd-chip {
+    background: #eef2ff;
+    border: 1px solid rgba(25, 118, 210, 0.25);
+    padding: 0.25rem 0.6rem;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  
+  .scd-chart-wrap {
+    height: 420px; // chart height
+  }
+  
+  .scd-state {
+    padding: 1rem;
+    color: #b71c1c;
+  }
+  .scd-chart-wrap {
+    height: 420px;
+    position: relative;
+  }
+  
+  .scd-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.75);
+    font-weight: 700;
+  }
+  
+  .scd-overlay.error {
+    color: #b71c1c;
+  }
+  
