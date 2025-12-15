@@ -1,3 +1,60 @@
+<mat-sidenav-container class="app-shell" dir="rtl">
 
-
-<router-outlet></router-outlet>
+    <!-- SIDE MENU -->
+    <mat-sidenav #drawer class="app-sidenav" mode="over">
+      <div class="side-title">תפריט</div>
+  
+      <mat-nav-list>
+        <a mat-list-item routerLink="/serviceCallsDashboard" (click)="drawer.close()">
+          <mat-icon>dashboard</mat-icon>
+          <span>דשבורד קריאות</span>
+        </a>
+  
+        <a mat-list-item routerLink="/service-call-list" (click)="drawer.close()">
+          <mat-icon>list</mat-icon>
+          <span>רשימת קריאות</span>
+        </a>
+        <a mat-list-item routerLink="/service-calls-admin-config" (click)="drawer.close()">
+            <mat-icon>settings</mat-icon>
+            <span>הגדרות</span>
+          </a>
+        <a mat-list-item routerLink="/service-call/new" (click)="drawer.close()">
+          <mat-icon>add_circle</mat-icon>
+          <span>פתיחת קריאה</span>
+        </a>
+  
+        <!-- add more routes here -->
+      </mat-nav-list>
+    </mat-sidenav>
+  
+    <!-- MAIN AREA -->
+    <mat-sidenav-content class="app-content">
+  
+      <!-- HEADER -->
+      <mat-toolbar color="primary" class="app-header">
+        <button mat-icon-button (click)="drawer.toggle()" aria-label="menu">
+          <mat-icon>menu</mat-icon>
+        </button>
+  
+        <span class="app-title">Service Calls</span>
+  
+        <span class="spacer"></span>
+  
+        <!-- optional right actions -->
+        <!-- <button mat-icon-button><mat-icon>refresh</mat-icon></button> -->
+      </mat-toolbar>
+  
+      <!-- PAGE CONTENT -->
+      <main class="app-main">
+        <router-outlet></router-outlet>
+      </main>
+  
+      <!-- FOOTER -->
+      <footer class="app-footer">
+        <div>© {{ year }} Service Calls</div>
+        <div class="footer-right">TZMC</div>
+      </footer>
+  
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+  

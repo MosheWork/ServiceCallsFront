@@ -1,0 +1,53 @@
+.app-shell {
+    height: 100vh;
+  }
+  
+  .app-content {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  .app-title {
+    font-weight: 900;
+    margin-right: 10px;
+  }
+  
+  .spacer {
+    flex: 1 1 auto;
+  }
+  
+  .app-main {
+    flex: 1 1 auto;
+    padding: 12px;
+    overflow: auto;
+    background: #f6f7fb;
+  }
+  
+  .app-footer {
+    padding: 10px 14px;
+    border-top: 1px solid rgba(0,0,0,0.08);
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    opacity: 0.8;
+  }
+  
+  .app-sidenav {
+    width: 280px;
+  }
+  
+  .side-title {
+    padding: 14px 16px 8px 16px;
+    font-weight: 900;
+    opacity: 0.75;
+  }
+  

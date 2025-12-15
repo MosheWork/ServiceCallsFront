@@ -77,7 +77,16 @@
 
         </mat-select>
       </mat-form-field>
-
+      <mat-form-field class="scd-field" appearance="outline">
+        <mat-label>גורם מטפל (UserInCharge)</mat-label>
+      
+        <mat-select formControlName="userInChargeNames" multiple>
+          <mat-option *ngFor="let u of userInChargeOptions" [value]="u">
+            {{ u }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      
       <!-- buttons -->
       <div class="scd-actions">
         <button mat-raised-button color="primary" type="button" (click)="clearFilters()">
@@ -172,7 +181,7 @@
   
 
 <!-- =========================
-     GRAPHS (2 cards in same row)
+     GRAPHS (3 cards in same row)
      ========================= -->
      <div class="scd-graphs-row" dir="rtl">
 
@@ -191,7 +200,12 @@
             <canvas #sub1BarCanvas></canvas>
           </div>
         </mat-card>
-      
+        <mat-card class="scd-graph-card scd-graph-wide">
+            <div class="scd-card-title">לפי גורם מטפל</div>
+            <div class="scd-chart-wrap">
+              <canvas #userBarCanvas></canvas>
+            </div>
+          </mat-card>
       </div>
       
 

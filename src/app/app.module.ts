@@ -31,6 +31,11 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { ServiceCallsDashboardComponent } from './service-calls-dashboard/service-calls-dashboard.component';
 import { MatChipsModule } from '@angular/material/chips';
 import { NgxGaugeModule } from 'ngx-gauge';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatListModule } from '@angular/material/list';
+import { AlertMsgComponent } from './alert-msg/alert-msg.component';
+
 
 
 
@@ -41,7 +46,8 @@ import { NgxGaugeModule } from 'ngx-gauge';
     ServiceCallListComponent,
     ServiceCallEditComponent,
     ServiceCallsAdminConfigComponent,
-    ServiceCallsDashboardComponent
+    ServiceCallsDashboardComponent,
+    AlertMsgComponent
   ],
   imports: [
     BrowserModule,
@@ -69,7 +75,7 @@ import { NgxGaugeModule } from 'ngx-gauge';
     MatTabsModule,
     MatDialogModule,
     MatChipsModule,
-    NgxGaugeModule 
+    NgxGaugeModule ,MatToolbarModule,MatSidenavModule,MatListModule
   ],
   providers: [],
   bootstrap: [AppComponent]

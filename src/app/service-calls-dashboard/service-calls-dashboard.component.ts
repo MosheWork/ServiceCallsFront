@@ -95,7 +95,10 @@ export class ServiceCallsDashboardComponent implements OnInit, AfterViewInit, On
   @ViewChild('sub1BarCanvas') sub1BarCanvas!: ElementRef<HTMLCanvasElement>;
 
   private sub?: Subscription;
-
+  userInChargeOptions: string[] = [];   
+  private userChart: Chart | null = null; 
+  @ViewChild('userBarCanvas') userBarCanvas!: ElementRef<HTMLCanvasElement>; 
+  
   // =========================
   // Colors (pastel palette)
   // =========================
@@ -139,8 +142,9 @@ export class ServiceCallsDashboardComponent implements OnInit, AfterViewInit, On
     this.filterForm = this.fb.group({
       startDate: [null],
       endDate: [null],
-      mainCategoryNames: [[]],  // multi-select
-      subCategory1Names: [[]]   // multi-select
+      mainCategoryNames: [[]],  
+      subCategory1Names: [[]] ,  
+      userInChargeNames: [[]]   
     });
   }
 
@@ -228,56 +232,69 @@ export class ServiceCallsDashboardComponent implements OnInit, AfterViewInit, On
    * This keeps SubCategory1 dropdown relevant to selected main categories.
    */
   private applyFiltersAndOptions(): void {
-    const { startDate, endDate, mainCategoryNames, subCategory1Names } = this.filterForm.value;
-
+    const { startDate, endDate, mainCategoryNames, subCategory1Names, userInChargeNames } = this.filterForm.value;
+  
     const start: Date | null = startDate ? new Date(startDate) : null;
     const end: Date | null = endDate ? new Date(endDate) : null;
     if (end) end.setHours(23, 59, 59, 999);
-
-    const selectedMains: string[] = Array.isArray(mainCategoryNames) ? mainCategoryNames.map((x: any) => this.norm(x)) : [];
-    const selectedSub1: string[] = Array.isArray(subCategory1Names) ? subCategory1Names.map((x: any) => this.norm(x)) : [];
-
-    // Step 1: filter by date + main only (drives SubCategory1 options and sub1 chart scope)
+  
+    const selectedMains: string[] = Array.isArray(mainCategoryNames) ? mainCategoryNames : [];
+    const selectedSub1: string[] = Array.isArray(subCategory1Names) ? subCategory1Names : [];
+    const selectedUsers: string[] = Array.isArray(userInChargeNames) ? userInChargeNames : [];
+  
+    // 1) filter by date + main
     const rowsDateMain = this.allRows.filter(r => {
       const dt = r.entryTime ? new Date(r.entryTime) : null;
-
+  
       const okDate =
         (!start || (dt && dt >= start)) &&
         (!end || (dt && dt <= end));
-
-      const mainName = this.norm(r.mainCategoryName);
+  
+      const mainName = (r.mainCategoryName || '').trim();
       const okMain = selectedMains.length === 0 ? true : selectedMains.includes(mainName);
-
+  
       return okDate && okMain;
     });
-
-    // Update SubCategory1 options
+  
+    // 2) Sub1 options depend on date+main
     this.subCategory1Options = this.getDistinct(rowsDateMain.map(x => x.subCategory1Name));
-
-    // Keep only selected sub1 that still exists in options
     const validSub1 = selectedSub1.filter(x => this.subCategory1Options.includes(x));
     if (validSub1.length !== selectedSub1.length) {
       this.filterForm.patchValue({ subCategory1Names: validSub1 }, { emitEvent: false });
     }
-
-    // Step 2: apply sub1 filter too (final filtered rows)
-    this.filteredRows = rowsDateMain.filter(r => {
-      const s1 = this.norm(r.subCategory1Name);
+  
+    // 3) rows after applying Sub1 (for User options)
+    const rowsDateMainSub1 = rowsDateMain.filter(r => {
+      const s1 = (r.subCategory1Name || '').trim();
       return validSub1.length === 0 ? true : validSub1.includes(s1);
     });
-  }
-
-  /**
-   * Clears filters (user action)
-   */
-  clearFilters(): void {
-    this.filterForm.patchValue({
-      startDate: null,
-      endDate: null,
-      mainCategoryNames: [],
-      subCategory1Names: []
+  
+    // 4) User options depend on date+main+sub1
+    this.userInChargeOptions = this.getDistinct(rowsDateMainSub1.map(x => x.userInChargeName));
+    const validUsers = selectedUsers.filter(x => this.userInChargeOptions.includes(x));
+    if (validUsers.length !== selectedUsers.length) {
+      this.filterForm.patchValue({ userInChargeNames: validUsers }, { emitEvent: false });
+    }
+  
+    // 5) final filtered rows (apply User filter too)
+    this.filteredRows = rowsDateMainSub1.filter(r => {
+      const u = (r.userInChargeName || '').trim();
+      return validUsers.length === 0 ? true : validUsers.includes(u);
     });
   }
+    /**
+   * Clears filters (user action)
+   */
+    clearFilters(): void {
+      this.filterForm.patchValue({
+        startDate: null,
+        endDate: null,
+        mainCategoryNames: [],
+        subCategory1Names: [],
+        userInChargeNames: []   // ✅ NEW
+      });
+    }
+    
 
   // =========================
   // Summary cards logic (KPIs)
@@ -417,6 +434,25 @@ export class ServiceCallsDashboardComponent implements OnInit, AfterViewInit, On
       };
       this.sub1Chart = new Chart(this.sub1BarCanvas.nativeElement, cfg);
     }
+
+    // USER chart
+if (this.userBarCanvas?.nativeElement) {
+  const cfg: ChartConfiguration<'bar'> = {
+    type: 'bar',
+    data: { labels: [], datasets: [{ label: 'כמות קריאות לפי גורם מטפל', data: [], backgroundColor: [] as any }] },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: true } },
+      scales: {
+        y: { beginAtZero: true, ticks: { precision: 0 } },
+        x: { ticks: { autoSkip: false } }
+      }
+    }
+  };
+  this.userChart = new Chart(this.userBarCanvas.nativeElement, cfg);
+}
+
   }
 
   /**
@@ -426,17 +462,14 @@ export class ServiceCallsDashboardComponent implements OnInit, AfterViewInit, On
    *   but highlights selected sub1 values.
    */
   private updateCharts(): void {
-    if (!this.mainChart || !this.sub1Chart) return;
-
-    // MAIN chart respects SubCategory1 filter
-    this.updateMainChart(this.filteredRows);
-
-    // SUB1 chart shows ALL under selected main (but highlights selection)
-    const rowsDateMain = this.getRowsByDateAndMainOnly();
-    this.updateSub1Chart(rowsDateMain);
+    // ✅ all charts use the SAME filtered set (date + main + sub1 + user)
+    const rows = this.filteredRows;
+  
+    this.updateMainChart(rows);
+    this.updateSub1Chart(rows);
+    this.updateUserChart(rows);
   }
-
-  /**
+    /**
    * Used for Sub1 chart scope: date range + selected main only
    */
   private getRowsByDateAndMainOnly(): ServiceCallDashboardModel[] {
@@ -542,6 +575,8 @@ export class ServiceCallsDashboardComponent implements OnInit, AfterViewInit, On
   private destroyCharts(): void {
     if (this.mainChart) { this.mainChart.destroy(); this.mainChart = null; }
     if (this.sub1Chart) { this.sub1Chart.destroy(); this.sub1Chart = null; }
+    if (this.userChart) { this.userChart.destroy(); this.userChart = null; }
+
   }
 
   // =========================
@@ -624,6 +659,41 @@ export class ServiceCallsDashboardComponent implements OnInit, AfterViewInit, On
   private getNiceYAxisMax(values: number[]): number {
     const max = Math.max(0, ...(values || []));
     return max + 1; // exactly +1 as you asked
+  }
+ 
+  private updateUserChart(rows: ServiceCallDashboardModel[]): void {
+    if (!this.userChart) return;
+  
+    const selectedUsers: string[] = Array.isArray(this.filterForm.value.userInChargeNames)
+      ? this.filterForm.value.userInChargeNames.map((x: any) => this.norm(x))
+      : [];
+  
+    const counts = new Map<string, number>();
+    for (const r of rows) {
+      const key = this.norm(r.userInChargeName) || 'לא משויך';
+      counts.set(key, (counts.get(key) || 0) + 1);
+    }
+  
+    const sorted = Array.from(counts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 20);
+    const labels = sorted.map(x => x[0]);
+    const values = sorted.map(x => x[1]);
+  
+    const colors = labels.map(lbl => {
+      if (selectedUsers.length === 0) return this.hexToRgba('#7BC7D6', 0.55);
+      return selectedUsers.includes(this.norm(lbl))
+        ? this.hexToRgba('#73C7A6', 0.75)
+        : this.hexToRgba('#A9B4C2', 0.22);
+    });
+  
+    this.userChart.data.labels = labels;
+    this.userChart.data.datasets[0].data = values as any;
+    (this.userChart.data.datasets[0] as any).backgroundColor = colors;
+  
+    // keep your "+1 y max" rule:
+    const yMax = this.getNiceYAxisMax(values);
+    (this.userChart.options.scales as any).y.max = yMax;
+  
+    this.userChart.update();
   }
   
 }

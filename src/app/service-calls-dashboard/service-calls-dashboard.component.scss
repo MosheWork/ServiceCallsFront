@@ -1,17 +1,27 @@
-.scd-page {
+/* =========================
+   PAGE LAYOUT
+   - overall spacing between cards
+   ========================= */
+   .scd-page {
     display: grid;
     gap: 1rem;
     padding: 1rem;
   }
   
+  /* =========================
+     BASE CARD STYLE
+     - shared look for filter + summary cards
+     ========================= */
   .scd-filter-card,
-  .scd-summary-card,
-  .scd-graphs-card {
+  .scd-summary-card {
     border-radius: 12px;
     padding: 1rem 1.25rem;
     position: relative;
   }
   
+  /* =========================
+     TITLES + SMALL TEXT
+     ========================= */
   .scd-card-title {
     font-weight: 900;
     font-size: 1.05rem;
@@ -25,6 +35,7 @@
   
   /* =========================
      FILTER CARD
+     - date range + main/sub filters in a responsive grid
      ========================= */
   .scd-filter-grid {
     display: grid;
@@ -40,19 +51,21 @@
     width: 100%;
   }
   
+  /* buttons area in filter card */
   .scd-actions {
     display: flex;
     align-items: center;
     justify-content: flex-end;
   }
   
-  /* chips inside select trigger */
+  /* chips inside mat-select trigger */
   .scd-chiplist {
     display: flex;
     flex-wrap: wrap;
     gap: 0.35rem;
   }
   
+  /* optional colored dot next to item (if you use it) */
   .color-dot {
     width: 10px;
     height: 10px;
@@ -63,7 +76,9 @@
   }
   
   /* =========================
-     SUMMARY CARD (gauges + statuses)
+     SUMMARY CARD
+     - left: 2 gauges
+     - right: total + statuses
      ========================= */
   .scd-summary-grid {
     display: grid;
@@ -75,7 +90,8 @@
     }
   }
   
-  .scd-gauges {
+  /* two gauges side-by-side */
+  .scd-gauges-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
@@ -85,7 +101,16 @@
     }
   }
   
-  .scd-gauge-box,
+  .scd-gauge-item {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    background: rgba(255, 255, 255, 0.75);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
   .scd-status-box {
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 12px;
@@ -93,23 +118,21 @@
     background: rgba(255, 255, 255, 0.75);
   }
   
+  /* small title inside gauge/status boxes */
   .scd-box-title {
     font-weight: 900;
     margin-bottom: 0.35rem;
+    align-self: flex-start;
   }
   
-  .scd-big-number {
-    font-size: 1.2rem;
-    font-weight: 900;
-    margin-top: 0.25rem;
-  }
-  
+  /* big total number */
   .scd-total {
     font-size: 2rem;
     font-weight: 900;
     margin: 0.25rem 0 0.75rem 0;
   }
   
+  /* status breakdown list */
   .scd-status-list {
     display: grid;
     gap: 0.35rem;
@@ -132,91 +155,7 @@
     font-weight: 800;
   }
   
-  /* =========================
-     GRAPHS CARD
-     ========================= */
-  .scd-chart-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  
-    @media (max-width: 1100px) {
-      grid-template-columns: 1fr;
-    }
-  }
-  
-  .scd-chart-title {
-    font-weight: 900;
-    margin-bottom: 0.5rem;
-  }
-  
-  .scd-chart-wrap {
-    height: 360px;
-  }
-  
-  /* overlay error */
-  .scd-overlay {
-    margin-top: 0.75rem;
-    padding: 0.75rem;
-    border-radius: 10px;
-    font-weight: 800;
-  }
-  
-  .scd-overlay.error {
-    background: rgba(183, 28, 28, 0.08);
-    color: #b71c1c;
-    border: 1px solid rgba(183, 28, 28, 0.18);
-  }
-  .gauge-value {
-    font-size: 20px;   // smaller text
-    font-weight: 800;
-    opacity: 0.85;
-  }
-  
-  .gauge-label {
-    font-size: 12px;   // smaller label
-    font-weight: 700;
-    opacity: 0.7;
-  }
-/* summary grid: left = gauges row, right = status box */
-.scd-summary-grid {
-    display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 1rem;
-  
-    @media (max-width: 1100px) {
-      grid-template-columns: 1fr;
-    }
-  }
-  
-  /* ONE ROW holding both gauges inside same area */
-  .scd-gauges-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-  
-    @media (max-width: 700px) {
-      grid-template-columns: 1fr;
-    }
-  }
-  
-  .scd-gauge-item {
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 12px;
-    padding: 0.85rem 1rem;
-    background: rgba(255, 255, 255, 0.75);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .scd-box-title {
-    font-weight: 900;
-    margin-bottom: 0.35rem;
-    align-self: flex-start;
-  }
-  
-  /* smaller text inside gauge */
+  /* gauge internal text */
   .gauge-value {
     font-size: 18px;
     font-weight: 900;
@@ -230,29 +169,52 @@
     opacity: 0.65;
     margin-top: 4px;
   }
-  .scd-graphs-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-top: 1rem;
   
-    @media (max-width: 1100px) {
-      grid-template-columns: 1fr;
-    }
+  /* =========================
+     GRAPHS SECTION
+     - two cards in same row
+     - responsive to single column on small screens
+     ========================= */
+     .scd-graphs-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-top: 1rem;
+      
+        @media (max-width: 1100px) {
+          grid-template-columns: 1fr;
+        }
+      }
+      /* make the 3rd card span full row */
+.scd-graph-wide {
+    grid-column: 1 / -1;
   }
-  
+  /* each graph card */
   .scd-graph-card {
     padding: 1rem 1rem 1.25rem 1rem;
     border-radius: 14px;
   }
   
-  .scd-card-title {
-    font-weight: 900;
-    margin-bottom: 0.75rem;
+  /* wrapper sets chart height + inner spacing */
+  .scd-chart-wrap {
+    height: 360px;
+    padding: 0.5rem;
   }
   
-  .scd-chart-wrap {
-    height: 360px;     // adjust if you want taller/shorter
-    padding: 0.5rem;   // inner padding around canvas
+  /* =========================
+     ERROR / MESSAGE BOX
+     - shown under cards on errors
+     ========================= */
+  .scd-overlay {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 10px;
+    font-weight: 800;
+  }
+  
+  .scd-overlay.error {
+    background: rgba(183, 28, 28, 0.08);
+    color: #b71c1c;
+    border: 1px solid rgba(183, 28, 28, 0.18);
   }
   
