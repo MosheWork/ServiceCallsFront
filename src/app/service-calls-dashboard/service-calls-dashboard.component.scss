@@ -1,5 +1,5 @@
 .scd-body {
-    max-width: 1200px;
+    max-width: 1280px;
     margin: 1.25rem auto;
     padding: 0 1rem;
     direction: rtl;
@@ -23,11 +23,11 @@
   
   .scd-filter-form {
     display: grid;
-    grid-template-columns: 1fr 1fr auto;
+    grid-template-columns: 1fr 1fr 1fr auto;
     gap: 0.75rem;
     align-items: end;
   
-    @media (max-width: 900px) {
+    @media (max-width: 1100px) {
       grid-template-columns: 1fr;
     }
   }
@@ -37,14 +37,13 @@
     justify-content: flex-start;
     padding-bottom: 0.25rem;
   
-    button {
-      min-width: 140px;
-    }
+    button { min-width: 140px; }
   }
   
   .scd-chart-card {
     padding: 1rem 1.25rem;
     border-radius: 12px;
+    margin-bottom: 1rem;
   }
   
   .scd-chart-header {
@@ -74,14 +73,6 @@
   }
   
   .scd-chart-wrap {
-    height: 420px; // chart height
-  }
-  
-  .scd-state {
-    padding: 1rem;
-    color: #b71c1c;
-  }
-  .scd-chart-wrap {
     height: 420px;
     position: relative;
   }
@@ -98,5 +89,23 @@
   
   .scd-overlay.error {
     color: #b71c1c;
+  }
+  
+  .scd-muted {
+    opacity: 0.7;
+  }
+  
+  .color-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    display: inline-block;
+    margin-left: 8px;
+  }
+  
+  .scd-chiplist {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
   }
   

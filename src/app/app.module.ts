@@ -29,6 +29,7 @@ import { ServiceCallsAdminConfigComponent } from './service-calls-admin-config/s
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialogModule } from '@angular/material/dialog';
 import { ServiceCallsDashboardComponent } from './service-calls-dashboard/service-calls-dashboard.component';
+import { MatChipsModule } from '@angular/material/chips';
 
 
 
@@ -66,7 +67,8 @@ import { ServiceCallsDashboardComponent } from './service-calls-dashboard/servic
     MatDatepickerModule,
     MatNativeDateModule,
     MatTabsModule,
-    MatDialogModule
+    MatDialogModule,
+    MatChipsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

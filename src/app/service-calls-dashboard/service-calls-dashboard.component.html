@@ -1,5 +1,6 @@
 <div class="scd-body" dir="rtl">
 
+    <!-- Filters -->
     <mat-card class="scd-filter-card">
       <div class="scd-title">דשבורד קריאות שירות</div>
   
@@ -15,34 +16,92 @@
           <mat-date-range-picker #picker></mat-date-range-picker>
         </mat-form-field>
   
+        <!-- MainCategory MULTI + chips colored -->
         <mat-form-field appearance="outline">
-          <mat-label>קטגוריה ראשית</mat-label>
-          <mat-select formControlName="mainCategoryName">
-            <mat-option value="ALL">הכל</mat-option>
-            <mat-option *ngFor="let c of mainCategories" [value]="c">{{ c }}</mat-option>
+          <mat-label>קטגוריה ראשית (רב בחירה)</mat-label>
+          <mat-select formControlName="mainCategoryNames" multiple>
+
+            <mat-select-trigger>
+              <mat-chip-list class="scd-chiplist"
+                *ngIf="(filterForm.value.mainCategoryNames?.length || 0) > 0">
+          
+                <mat-chip
+                  *ngFor="let m of filterForm.value.mainCategoryNames"
+                  [ngStyle]="getChipStyle(m)"
+                  selected>
+                  {{ m }}
+                </mat-chip>
+          
+              </mat-chip-list>
+          
+              <span *ngIf="(filterForm.value.mainCategoryNames?.length || 0) === 0" class="scd-muted">
+                הכל
+              </span>
+            </mat-select-trigger>
+          
+            <mat-option *ngFor="let c of mainCategories" [value]="c">
+              <span class="color-dot" [style.backgroundColor]="getDotColor(c)"></span>
+              {{ c }}
+            </mat-option>
+          
+          </mat-select>
+          
+        </mat-form-field>
+  
+        <!-- SubCategory1 filter -->
+        <mat-form-field appearance="outline">
+          <mat-label>תת-קטגוריה 1 (רב בחירה)</mat-label>
+          <mat-select formControlName="subCategory1Names" multiple>
+            <mat-select-trigger>
+              <span *ngIf="(filterForm.value.subCategory1Names?.length || 0) === 0" class="scd-muted">
+                הכל
+              </span>
+              <span *ngIf="(filterForm.value.subCategory1Names?.length || 0) > 0">
+                נבחרו {{ filterForm.value.subCategory1Names.length }}
+              </span>
+            </mat-select-trigger>
+  
+            <mat-option *ngFor="let s of subCategory1Options" [value]="s">
+              {{ s }}
+            </mat-option>
           </mat-select>
         </mat-form-field>
   
         <div class="scd-actions">
           <button mat-stroked-button type="button" (click)="clearFilters()">נקה פילטרים</button>
         </div>
-  
       </form>
     </mat-card>
+  
+    <!-- Chart 1: MainCategory -->
     <mat-card class="scd-chart-card">
-        <div class="scd-chart-header">
-          <div class="scd-chart-title">גרף לפי קטגוריה ראשית</div>
-          <div class="scd-chip">סה"כ אחרי פילטר: {{ filteredRows.length }}</div>
-        </div>
-      
-        <div class="scd-chart-wrap">
-          <canvas #barCanvas></canvas>
-      
-          <div class="scd-overlay" *ngIf="isLoading">טוען נתונים...</div>
-          <div class="scd-overlay error" *ngIf="!isLoading && errorMessage">{{ errorMessage }}</div>
-        </div>
-      </mat-card>
-      
+      <div class="scd-chart-header">
+        <div class="scd-chart-title">גרף לפי קטגוריה ראשית</div>
+        <div class="scd-chip">סה"כ בטבלה אחרי פילטר: {{ filteredRows.length }}</div>
+      </div>
+  
+      <div class="scd-chart-wrap">
+        <canvas #mainBarCanvas></canvas>
+  
+        <div class="scd-overlay" *ngIf="isLoading">טוען נתונים...</div>
+        <div class="scd-overlay error" *ngIf="!isLoading && errorMessage">{{ errorMessage }}</div>
+      </div>
+    </mat-card>
+  
+    <!-- Chart 2: SubCategory1 (shows ALL under selected main categories) -->
+    <mat-card class="scd-chart-card">
+      <div class="scd-chart-header">
+        <div class="scd-chart-title">גרף לפי תת-קטגוריה 1 (לפי קטגוריה ראשית שנבחרה)</div>
+        <div class="scd-chip">מציג הכל תחת ה־Main שנבחר</div>
+      </div>
+  
+      <div class="scd-chart-wrap">
+        <canvas #sub1BarCanvas></canvas>
+  
+        <div class="scd-overlay" *ngIf="isLoading">טוען נתונים...</div>
+        <div class="scd-overlay error" *ngIf="!isLoading && errorMessage">{{ errorMessage }}</div>
+      </div>
+    </mat-card>
   
   </div>
   
