@@ -30,7 +30,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialogModule } from '@angular/material/dialog';
 import { ServiceCallsDashboardComponent } from './service-calls-dashboard/service-calls-dashboard.component';
 import { MatChipsModule } from '@angular/material/chips';
-
+import { NgxGaugeModule } from 'ngx-gauge';
 
 
 
@@ -68,7 +68,8 @@ import { MatChipsModule } from '@angular/material/chips';
     MatNativeDateModule,
     MatTabsModule,
     MatDialogModule,
-    MatChipsModule
+    MatChipsModule,
+    NgxGaugeModule 
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,98 +1,56 @@
-.scd-body {
-    max-width: 1280px;
-    margin: 1.25rem auto;
-    padding: 0 1rem;
-    direction: rtl;
-    text-align: right;
-  }
-  
-  .scd-filter-card {
-    padding: 1rem 1.25rem;
-    border-radius: 12px;
-    margin-bottom: 1rem;
-    background: linear-gradient(135deg, #f5f7ff 0%, #ffffff 70%);
-    border-inline-start: 4px solid #1976d2;
-  }
-  
-  .scd-title {
-    font-size: 1.35rem;
-    font-weight: 700;
-    margin-bottom: 0.75rem;
-    color: #1a237e;
-  }
-  
-  .scd-filter-form {
+.scd-page {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .scd-filter-card,
+  .scd-summary-card,
+  .scd-graphs-card {
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    position: relative;
+  }
+  
+  .scd-card-title {
+    font-weight: 900;
+    font-size: 1.05rem;
+    margin-bottom: 0.75rem;
+  }
+  
+  .scd-muted {
+    opacity: 0.65;
+    font-weight: 600;
+  }
+  
+  /* =========================
+     FILTER CARD
+     ========================= */
+  .scd-filter-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 0.75rem;
-    align-items: end;
   
     @media (max-width: 1100px) {
       grid-template-columns: 1fr;
     }
   }
   
+  .scd-field {
+    width: 100%;
+  }
+  
   .scd-actions {
     display: flex;
-    justify-content: flex-start;
-    padding-bottom: 0.25rem;
-  
-    button { min-width: 140px; }
-  }
-  
-  .scd-chart-card {
-    padding: 1rem 1.25rem;
-    border-radius: 12px;
-    margin-bottom: 1rem;
-  }
-  
-  .scd-chart-header {
-    display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    margin-bottom: 0.75rem;
-  
-    @media (max-width: 900px) {
-      flex-direction: column;
-      align-items: flex-start;
-    }
+    justify-content: flex-end;
   }
   
-  .scd-chart-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-  }
-  
-  .scd-chip {
-    background: #eef2ff;
-    border: 1px solid rgba(25, 118, 210, 0.25);
-    padding: 0.25rem 0.6rem;
-    border-radius: 999px;
-    font-weight: 600;
-  }
-  
-  .scd-chart-wrap {
-    height: 420px;
-    position: relative;
-  }
-  
-  .scd-overlay {
-    position: absolute;
-    inset: 0;
+  /* chips inside select trigger */
+  .scd-chiplist {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255,255,255,0.75);
-    font-weight: 700;
-  }
-  
-  .scd-overlay.error {
-    color: #b71c1c;
-  }
-  
-  .scd-muted {
-    opacity: 0.7;
+    flex-wrap: wrap;
+    gap: 0.35rem;
   }
   
   .color-dot {
@@ -101,11 +59,175 @@
     border-radius: 999px;
     display: inline-block;
     margin-left: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
   }
   
-  .scd-chiplist {
+  /* =========================
+     SUMMARY CARD (gauges + statuses)
+     ========================= */
+  .scd-summary-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 1rem;
+  
+    @media (max-width: 1100px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .scd-gauges {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  
+    @media (max-width: 700px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .scd-gauge-box,
+  .scd-status-box {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    background: rgba(255, 255, 255, 0.75);
+  }
+  
+  .scd-box-title {
+    font-weight: 900;
+    margin-bottom: 0.35rem;
+  }
+  
+  .scd-big-number {
+    font-size: 1.2rem;
+    font-weight: 900;
+    margin-top: 0.25rem;
+  }
+  
+  .scd-total {
+    font-size: 2rem;
+    font-weight: 900;
+    margin: 0.25rem 0 0.75rem 0;
+  }
+  
+  .scd-status-list {
+    display: grid;
+    gap: 0.35rem;
+  }
+  
+  .scd-status-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 0.5rem;
+    padding: 0.35rem 0.25rem;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.08);
+  }
+  
+  .scd-status-row .count {
+    font-weight: 900;
+  }
+  
+  .scd-status-row .pct {
+    opacity: 0.7;
+    font-weight: 800;
+  }
+  
+  /* =========================
+     GRAPHS CARD
+     ========================= */
+  .scd-chart-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  
+    @media (max-width: 1100px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .scd-chart-title {
+    font-weight: 900;
+    margin-bottom: 0.5rem;
+  }
+  
+  .scd-chart-wrap {
+    height: 360px;
+  }
+  
+  /* overlay error */
+  .scd-overlay {
+    margin-top: 0.75rem;
+    padding: 0.75rem;
+    border-radius: 10px;
+    font-weight: 800;
+  }
+  
+  .scd-overlay.error {
+    background: rgba(183, 28, 28, 0.08);
+    color: #b71c1c;
+    border: 1px solid rgba(183, 28, 28, 0.18);
+  }
+  .gauge-value {
+    font-size: 20px;   // smaller text
+    font-weight: 800;
+    opacity: 0.85;
+  }
+  
+  .gauge-label {
+    font-size: 12px;   // smaller label
+    font-weight: 700;
+    opacity: 0.7;
+  }
+/* summary grid: left = gauges row, right = status box */
+.scd-summary-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 1rem;
+  
+    @media (max-width: 1100px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  /* ONE ROW holding both gauges inside same area */
+  .scd-gauges-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  
+    @media (max-width: 700px) {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .scd-gauge-item {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    background: rgba(255, 255, 255, 0.75);
     display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .scd-box-title {
+    font-weight: 900;
+    margin-bottom: 0.35rem;
+    align-self: flex-start;
+  }
+  
+  /* smaller text inside gauge */
+  .gauge-value {
+    font-size: 18px;
+    font-weight: 900;
+    opacity: 0.85;
+    line-height: 1;
+  }
+  
+  .gauge-label {
+    font-size: 12px;
+    font-weight: 700;
+    opacity: 0.65;
+    margin-top: 4px;
   }
   

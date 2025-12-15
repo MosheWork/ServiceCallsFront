@@ -1,107 +1,205 @@
-<div class="scd-body" dir="rtl">
 
-    <!-- Filters -->
-    <mat-card class="scd-filter-card">
-      <div class="scd-title">דשבורד קריאות שירות</div>
-  
-      <form [formGroup]="filterForm" class="scd-filter-form">
-  
-        <mat-form-field appearance="outline">
-          <mat-label>טווח תאריכים</mat-label>
-          <mat-date-range-input [rangePicker]="picker">
-            <input matStartDate formControlName="startDate" placeholder="מתאריך">
-            <input matEndDate formControlName="endDate" placeholder="עד תאריך">
-          </mat-date-range-input>
-          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-date-range-picker #picker></mat-date-range-picker>
-        </mat-form-field>
-  
-        <!-- MainCategory MULTI + chips colored -->
-        <mat-form-field appearance="outline">
-          <mat-label>קטגוריה ראשית (רב בחירה)</mat-label>
-          <mat-select formControlName="mainCategoryNames" multiple>
+<div class="scd-page" dir="rtl" [hidden]="isLoading">
+  <!-- =========================
+       1) FILTER CARD
+       ========================= -->
+  <mat-card class="scd-filter-card">
+    <div class="scd-card-title">פילטרים</div>
 
-            <mat-select-trigger>
-              <mat-chip-list class="scd-chiplist"
-                *ngIf="(filterForm.value.mainCategoryNames?.length || 0) > 0">
-          
-                <mat-chip
-                  *ngFor="let m of filterForm.value.mainCategoryNames"
-                  [ngStyle]="getChipStyle(m)"
-                  selected>
-                  {{ m }}
-                </mat-chip>
-          
-              </mat-chip-list>
-          
-              <span *ngIf="(filterForm.value.mainCategoryNames?.length || 0) === 0" class="scd-muted">
-                הכל
-              </span>
-            </mat-select-trigger>
-          
-            <mat-option *ngFor="let c of mainCategories" [value]="c">
-              <span class="color-dot" [style.backgroundColor]="getDotColor(c)"></span>
-              {{ c }}
-            </mat-option>
-          
-          </mat-select>
-          
-        </mat-form-field>
+    <form [formGroup]="filterForm" class="scd-filter-grid">
+
+      <!-- Date range -->
+      <mat-form-field appearance="outline" class="scd-field">
+        <mat-label>טווח תאריכים</mat-label>
+
+        <mat-date-range-input [rangePicker]="picker">
+          <input matStartDate formControlName="startDate" placeholder="מתאריך">
+          <input matEndDate formControlName="endDate" placeholder="עד תאריך">
+        </mat-date-range-input>
+
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-date-range-picker #picker></mat-date-range-picker>
+      </mat-form-field>
+
+      <!-- MainCategory (multi) -->
+      <mat-form-field appearance="outline" class="scd-field">
+        <mat-label>קטגוריה ראשית</mat-label>
+
+        <mat-select formControlName="mainCategoryNames" multiple>
+
+          <!-- selected chips -->
+          <mat-select-trigger>
+            <mat-chip-list class="scd-chiplist"
+              *ngIf="(filterForm.value.mainCategoryNames?.length || 0) > 0">
+
+              <mat-chip
+                *ngFor="let m of filterForm.value.mainCategoryNames"
+                [ngStyle]="getChipStyle(m)"
+                selected>
+                {{ m }}
+              </mat-chip>
+
+            </mat-chip-list>
+
+            <span *ngIf="(filterForm.value.mainCategoryNames?.length || 0) === 0" class="scd-muted">
+              הכל
+            </span>
+          </mat-select-trigger>
+
+          <!-- options -->
+          <mat-option *ngFor="let c of mainCategories" [value]="c">
+            <span class="color-dot" [style.backgroundColor]="getDotColor(c)"></span>
+            {{ c }}
+          </mat-option>
+
+        </mat-select>
+      </mat-form-field>
+
+      <!-- SubCategory1 (multi) -->
+      <mat-form-field appearance="outline" class="scd-field">
+        <mat-label>תת-קטגוריה 1</mat-label>
+
+        <mat-select formControlName="subCategory1Names" multiple>
+
+          <mat-select-trigger>
+            <span *ngIf="(filterForm.value.subCategory1Names?.length || 0) === 0" class="scd-muted">
+              הכל
+            </span>
+
+            <span *ngIf="(filterForm.value.subCategory1Names?.length || 0) > 0">
+              נבחרו {{ filterForm.value.subCategory1Names.length }}
+            </span>
+          </mat-select-trigger>
+
+          <mat-option *ngFor="let s of subCategory1Options" [value]="s">
+            {{ s }}
+          </mat-option>
+
+        </mat-select>
+      </mat-form-field>
+
+      <!-- buttons -->
+      <div class="scd-actions">
+        <button mat-raised-button color="primary" type="button" (click)="clearFilters()">
+          נקה פילטרים
+        </button>
+      </div>
+
+    </form>
+  </mat-card>
+
+
+  <!-- =========================
+       2) KPI / SUMMARY CARD
+       ========================= -->
+ <!-- =========================
+     KPI / SUMMARY CARD
+     ========================= -->
+<mat-card class="scd-summary-card" dir="rtl">
+
+    <div class="scd-summary-grid">
   
-        <!-- SubCategory1 filter -->
-        <mat-form-field appearance="outline">
-          <mat-label>תת-קטגוריה 1 (רב בחירה)</mat-label>
-          <mat-select formControlName="subCategory1Names" multiple>
-            <mat-select-trigger>
-              <span *ngIf="(filterForm.value.subCategory1Names?.length || 0) === 0" class="scd-muted">
-                הכל
-              </span>
-              <span *ngIf="(filterForm.value.subCategory1Names?.length || 0) > 0">
-                נבחרו {{ filterForm.value.subCategory1Names.length }}
-              </span>
-            </mat-select-trigger>
+      <!-- ONE CARD: 2 gauges in same row -->
+      <div class="scd-gauges-row">
   
-            <mat-option *ngFor="let s of subCategory1Options" [value]="s">
-              {{ s }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+        <!-- TODAY -->
+        <div class="scd-gauge-item">
+          <div class="scd-box-title">היום</div>
   
-        <div class="scd-actions">
-          <button mat-stroked-button type="button" (click)="clearFilters()">נקה פילטרים</button>
+          <ngx-gauge
+            [value]="todayCalls"
+            [max]="todayGaugeMax"
+            [type]="'arch'"
+            [size]="150"
+            [thick]="10"
+            [append]="''">
+  
+            <ngx-gauge-value>
+              <div class="gauge-value">{{ todayCalls }}</div>
+            </ngx-gauge-value>
+  
+            <ngx-gauge-label>
+              <div class="gauge-label">קריאות</div>
+            </ngx-gauge-label>
+  
+          </ngx-gauge>
         </div>
-      </form>
-    </mat-card>
   
-    <!-- Chart 1: MainCategory -->
-    <mat-card class="scd-chart-card">
-      <div class="scd-chart-header">
-        <div class="scd-chart-title">גרף לפי קטגוריה ראשית</div>
-        <div class="scd-chip">סה"כ בטבלה אחרי פילטר: {{ filteredRows.length }}</div>
+        <!-- MONTH -->
+        <div class="scd-gauge-item">
+          <div class="scd-box-title">החודש</div>
+  
+          <ngx-gauge
+            [value]="monthCalls"
+            [max]="monthGaugeMax"
+            [type]="'arch'"
+            [size]="150"
+            [thick]="10"
+            [append]="''">
+  
+            <ngx-gauge-value>
+              <div class="gauge-value">{{ monthCalls }}</div>
+            </ngx-gauge-value>
+  
+            <ngx-gauge-label>
+              <div class="gauge-label">קריאות</div>
+            </ngx-gauge-label>
+  
+          </ngx-gauge>
+        </div>
+  
       </div>
   
-      <div class="scd-chart-wrap">
-        <canvas #mainBarCanvas></canvas>
+      <!-- Total + Status breakdown -->
+      <div class="scd-status-box">
+        <div class="scd-box-title">סה״כ קריאות (אחרי פילטר)</div>
+        <div class="scd-total">{{ totalCalls }}</div>
   
-        <div class="scd-overlay" *ngIf="isLoading">טוען נתונים...</div>
-        <div class="scd-overlay error" *ngIf="!isLoading && errorMessage">{{ errorMessage }}</div>
+        <div class="scd-status-list" *ngIf="statusSummary.length > 0">
+          <div class="scd-status-row" *ngFor="let s of statusSummary">
+            <div class="name">{{ s.status }}</div>
+            <div class="count">{{ s.count }}</div>
+            <div class="pct">{{ s.pct }}%</div>
+          </div>
+        </div>
+  
+        <div class="scd-muted" *ngIf="statusSummary.length === 0">
+          אין נתונים להצגה
+        </div>
       </div>
-    </mat-card>
   
-    <!-- Chart 2: SubCategory1 (shows ALL under selected main categories) -->
-    <mat-card class="scd-chart-card">
-      <div class="scd-chart-header">
-        <div class="scd-chart-title">גרף לפי תת-קטגוריה 1 (לפי קטגוריה ראשית שנבחרה)</div>
-        <div class="scd-chip">מציג הכל תחת ה־Main שנבחר</div>
+    </div>
+  
+  </mat-card>
+  
+
+  <!-- =========================
+       3) GRAPHS CARD
+       ========================= -->
+  <mat-card class="scd-graphs-card">
+
+    <div class="scd-card-title">גרפים</div>
+
+    <div class="scd-chart-row">
+
+      <div class="scd-chart-col">
+        <div class="scd-chart-title">לפי קטגוריה ראשית</div>
+        <div class="scd-chart-wrap">
+          <canvas #mainBarCanvas></canvas>
+        </div>
       </div>
-  
-      <div class="scd-chart-wrap">
-        <canvas #sub1BarCanvas></canvas>
-  
-        <div class="scd-overlay" *ngIf="isLoading">טוען נתונים...</div>
-        <div class="scd-overlay error" *ngIf="!isLoading && errorMessage">{{ errorMessage }}</div>
+
+      <div class="scd-chart-col">
+        <div class="scd-chart-title">לפי תת-קטגוריה 1</div>
+        <div class="scd-chart-wrap">
+          <canvas #sub1BarCanvas></canvas>
+        </div>
       </div>
-    </mat-card>
-  
-  </div>
-  
+
+    </div>
+
+    <div class="scd-overlay error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  </mat-card>
+
+</div>
