@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiBaseUrl: 'http://localhost:44390' // ← put YOUR URL here
-
+  apiBaseUrl: 'http://localhost:44390' ,
+  AuthUrl:'http://srv-apps-prod:47001/api/'
 };

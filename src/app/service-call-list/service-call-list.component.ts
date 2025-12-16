@@ -5,6 +5,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { Router } from '@angular/router';
+import { AuthenticationService } from '../services/authentication-service/authentication-service.service';
 
 export interface ServiceCallFullModel {
   
@@ -63,6 +64,9 @@ export class ServiceCallListComponent implements OnInit {
   newCallsCount = 0; 
 // 🔹 Date range filter for תאריך פתיחה
 
+UserName: string = '';
+profilePictureUrl: string = 'assets/default-user.png';
+loggedUser: string = '';
 
   isLoading = false;
   errorMessage = '';
@@ -100,12 +104,49 @@ export class ServiceCallListComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private router: Router
-  ) {}
+    private router: Router,
+    private authenticationService: AuthenticationService
+    ) {}
+  
 
-  ngOnInit(): void {
-    this.loadData();
+    ngOnInit(): void {
+      this.authenticationService.getAuthentication().subscribe(
+        (response) => {
+          const raw = response?.message || '';
+          const user = raw.includes('\\') ? raw.split('\\')[1] : raw;
+    
+          this.loggedUser = (user || '').toUpperCase();
+          this.getUserDetailsFromDBByUserName(this.loggedUser);
+    
+          // ממשיכים כרגיל
+          this.loadData();
+        },
+        (error) => {
+          console.error('❌ Authentication Failed:', error);
+    
+          // גם אם auth נכשל – עדיין נטען את הטבלה
+          this.loadData();
+        }
+      );
+    }
+    
+  
+  getUserDetailsFromDBByUserName(username: string): void {
+    this.http
+      .get<any>(`${environment.apiBaseUrl}/api/ServiceCRM/GetEmployeeInfo?username=${username.toUpperCase()}`)
+      .subscribe(
+        (data) => {
+          this.UserName = data?.userName || username;
+          this.profilePictureUrl = data?.profilePicture ? `${data.profilePicture}` : 'assets/default-user.png';
+        },
+        (error) => {
+          console.error('Error fetching employee info:', error);
+          this.UserName = username;
+          this.profilePictureUrl = 'assets/default-user.png';
+        }
+      );
   }
+  
   loadData(): void {
     this.isLoading = true;
     this.errorMessage = '';
