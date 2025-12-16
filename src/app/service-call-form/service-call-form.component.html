@@ -1,185 +1,208 @@
-<div class="service-call-form" dir="rtl">
-  <h1>פתיחת קריאת שירות</h1>
+<div class="service-call-page" >
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()">
 
-    <!-- כותרת -->
-    <div class="form-row">
-      <label for="title">כותרת *</label>
-      <input id="title" type="text" formControlName="title">
-      <div class="error" *ngIf="form.get('title')?.touched && form.get('title')?.invalid">
-        חובה למלא כותרת
+  <!-- ✅ טופס (כמו שיש לך) -->
+  <div class="sc-form-col">
+    <div class="service-call-form">
+      <h1>פתיחת קריאת שירות</h1>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <!-- כותרת -->
+        <div class="form-row">
+          <label for="title">כותרת *</label>
+          <input id="title" type="text" formControlName="title">
+          <div class="error" *ngIf="form.get('title')?.touched && form.get('title')?.invalid">
+            חובה למלא כותרת
+          </div>
+        </div>
+
+        <!-- תיאור -->
+        <div class="form-row">
+          <label for="description">תיאור</label>
+          <textarea id="description" rows="4" formControlName="description"></textarea>
+        </div>
+
+        <!-- משתמש פותח -->
+        <div class="form-row">
+          <label for="requestUser">משתמש פותח *</label>
+          <input id="requestUser" type="text" formControlName="requestUser">
+          <div class="error" *ngIf="form.get('requestUser')?.touched && form.get('requestUser')?.invalid">
+            חובה למלא שם משתמש
+          </div>
+        </div>
+
+        <!-- טלפון לחזרה -->
+        <div class="form-row">
+          <label for="callbackPhone">טלפון לחזרה *</label>
+          <input id="callbackPhone" type="text" formControlName="callbackPhone">
+          <div class="error" *ngIf="form.get('callbackPhone')?.touched && form.get('callbackPhone')?.invalid">
+            חובה למלא מספר טלפון
+          </div>
+        </div>
+
+        <!-- מיקום התקלה -->
+        <div class="form-row">
+          <label for="location">מיקום התקלה</label>
+          <input id="location" type="text" formControlName="location">
+        </div>
+
+        <!-- שם מחשב -->
+        <div class="form-row">
+          <label for="computerName">שם מחשב</label>
+          <input id="computerName" type="text" formControlName="computerName">
+        </div>
+
+        <!-- 🔻 קטגוריה ראשית -->
+        <div class="form-row">
+          <label for="mainCategoryID">קטגוריה ראשית *</label>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-select id="mainCategoryID"
+                        formControlName="mainCategoryID"
+                        (selectionChange)="onMainCategoryChange()">
+
+              <mat-option disabled>
+                <input matInput
+                       placeholder="חיפוש קטגוריה..."
+                       [(ngModel)]="mainCategorySearch"
+                       name="mainCategorySearch"
+                       [ngModelOptions]="{ standalone: true }"
+                       (click)="$event.stopPropagation()"
+                       (keydown)="$event.stopPropagation()">
+              </mat-option>
+
+              <mat-option *ngFor="let mc of filteredMainCategories()" [value]="mc.id">
+                {{ mc.name }}
+              </mat-option>
+
+            </mat-select>
+
+            <mat-error *ngIf="form.get('mainCategoryID')?.touched && form.get('mainCategoryID')?.invalid">
+              חובה לבחור קטגוריה
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- 🔻 תת־קטגוריה 1 -->
+        <div class="form-row" *ngIf="subCategory1List && subCategory1List.length">
+          <label for="subCategory1ID">תת־קטגוריה 1</label>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-select id="subCategory1ID"
+                        formControlName="subCategory1ID"
+                        (selectionChange)="onSubCategory1Change()">
+
+              <mat-option disabled>
+                <input matInput
+                       placeholder="חיפוש תת־קטגוריה..."
+                       [(ngModel)]="subCategory1Search"
+                       name="subCategory1Search"
+                       [ngModelOptions]="{ standalone: true }"
+                       (click)="$event.stopPropagation()"
+                       (keydown)="$event.stopPropagation()">
+              </mat-option>
+
+              <mat-option *ngFor="let sc1 of filteredSubCategory1()" [value]="sc1.id">
+                {{ sc1.name }}
+              </mat-option>
+
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- 🔻 תת־קטגוריה 2 -->
+        <div class="form-row" *ngIf="subCategory2List && subCategory2List.length">
+          <label for="subCategory2ID">תת־קטגוריה 2</label>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-select id="subCategory2ID" formControlName="subCategory2ID">
+
+              <mat-option disabled>
+                <input matInput
+                       placeholder="חיפוש תת־קטגוריה..."
+                       [(ngModel)]="subCategory2Search"
+                       name="subCategory2Search"
+                       [ngModelOptions]="{ standalone: true }"
+                       (click)="$event.stopPropagation()"
+                       (keydown)="$event.stopPropagation()">
+              </mat-option>
+
+              <mat-option *ngFor="let sc2 of filteredSubCategory2()" [value]="sc2.id">
+                {{ sc2.name }}
+              </mat-option>
+
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- עדיפות (נשאר) -->
+        <div class="form-row" *ngIf="priorities && priorities.length">
+          <label for="priorityID">עדיפות</label>
+          <select id="priorityID" formControlName="priorityID">
+            <option *ngFor="let pr of priorities" [ngValue]="pr.id">
+              {{ pr.name }}
+            </option>
+          </select>
+        </div>
+
+        <!-- כפתור שמירה -->
+        <div class="actions">
+          <button type="submit" [disabled]="form.invalid || isSubmitting">
+            {{ isSubmitting ? 'שולח...' : 'שמור קריאה' }}
+          </button>
+        </div>
+
+        <!-- הודעות -->
+        <div class="message success" *ngIf="successMessage">
+          {{ successMessage }}
+        </div>
+        <div class="message error" *ngIf="errorMessage">
+          {{ errorMessage }}
+        </div>
+
+      </form>
+    </div>
+  </div>
+ <!-- הודעות (ימין) -->
+<div class="sc-alert-col">
+  <div class="sc-alert-box">
+    <div class="sc-alert-title">הודעות</div>
+
+    <div class="sc-alert-loading" *ngIf="alertsLoading">טוען...</div>
+
+    <div class="sc-alert-error" *ngIf="!alertsLoading && alertsError">
+      {{ alertsError }}
+    </div>
+
+    <div class="sc-alert-empty" *ngIf="!alertsLoading && !alertsError && alerts.length === 0">
+      אין הודעות כרגע
+    </div>
+
+    <div class="sc-alert-list" *ngIf="!alertsLoading && !alertsError && alerts.length > 0">
+      <div class="sc-alert-item"
+           *ngFor="let a of alerts"
+           [style.border-inline-start-color]="alertBorderColor(a)">
+
+        <div class="sc-alert-head">
+          <span class="sc-alert-badge" [style.background]="alertBorderColor(a)">
+            P{{ a.priority || 2 }}
+          </span>
+
+          <span class="sc-alert-created">
+            {{ a.createdAt | date:'dd/MM/yyyy HH:mm' }}
+          </span>
+        </div>
+
+        <div class="sc-alert-text">{{ a.messageText }}</div>
+
+        <div class="sc-alert-range" *ngIf="a.startAt || a.stopAt">
+          {{ formatRange(a) }}
+        </div>
       </div>
     </div>
-
-    <!-- תיאור -->
-    <div class="form-row">
-      <label for="description">תיאור</label>
-      <textarea id="description" rows="4" formControlName="description"></textarea>
-    </div>
-
-    <!-- משתמש פותח -->
-    <div class="form-row">
-      <label for="requestUser">משתמש פותח *</label>
-      <input id="requestUser" type="text" formControlName="requestUser">
-      <div class="error" *ngIf="form.get('requestUser')?.touched && form.get('requestUser')?.invalid">
-        חובה למלא שם משתמש
-      </div>
-    </div>
-
-    <!-- טלפון לחזרה -->
-    <div class="form-row">
-      <label for="callbackPhone">טלפון לחזרה *</label>
-      <input id="callbackPhone" type="text" formControlName="callbackPhone">
-      <div class="error" *ngIf="form.get('callbackPhone')?.touched && form.get('callbackPhone')?.invalid">
-        חובה למלא מספר טלפון
-      </div>
-    </div>
-
-    <!-- מיקום התקלה -->
-    <div class="form-row">
-      <label for="location">מיקום התקלה</label>
-      <input id="location" type="text" formControlName="location">
-    </div>
-
-    <!-- שם מחשב -->
-    <div class="form-row">
-      <label for="computerName">שם מחשב</label>
-      <input id="computerName" type="text" formControlName="computerName">
-    </div>
-
-<!-- 🔻 קטגוריה ראשית -->
-<div class="form-row">
-  <label for="mainCategoryID">קטגוריה ראשית *</label>
-
-  <mat-form-field appearance="outline" class="full-width">
-    <mat-select
-      id="mainCategoryID"
-      formControlName="mainCategoryID"
-      (selectionChange)="onMainCategoryChange()">
-
-      <!-- search inside dropdown -->
-      <mat-option disabled>
-        <input
-          matInput
-          placeholder="חיפוש קטגוריה..."
-          [(ngModel)]="mainCategorySearch"
-          name="mainCategorySearch"
-          [ngModelOptions]="{ standalone: true }"
-          (click)="$event.stopPropagation()"
-          (keydown)="$event.stopPropagation()"
-        >
-      </mat-option>
-      
-      <mat-option
-        *ngFor="let mc of filteredMainCategories()"
-        [value]="mc.id">
-        {{ mc.name }}
-      </mat-option>
-      
-
-    </mat-select>
-
-    <mat-error *ngIf="form.get('mainCategoryID')?.touched && form.get('mainCategoryID')?.invalid">
-      חובה לבחור קטגוריה
-    </mat-error>
-  </mat-form-field>
+  </div>
 </div>
 
-<!-- 🔻 תת־קטגוריה 1 -->
-<div class="form-row" *ngIf="subCategory1List && subCategory1List.length">
-  <label for="subCategory1ID">תת־קטגוריה 1</label>
-
-  <mat-form-field appearance="outline" class="full-width">
-    <mat-select
-      id="subCategory1ID"
-      formControlName="subCategory1ID"
-      (selectionChange)="onSubCategory1Change()">
-
-      <!-- search inside dropdown -->
-      <mat-option disabled>
-        <input
-          matInput
-          placeholder="חיפוש תת־קטגוריה..."
-          [(ngModel)]="subCategory1Search"
-          name="subCategory1Search"
-          [ngModelOptions]="{ standalone: true }"
-          (click)="$event.stopPropagation()"
-          (keydown)="$event.stopPropagation()"
-        >
-      </mat-option>
-      
-      <mat-option
-        *ngFor="let sc1 of filteredSubCategory1()"
-        [value]="sc1.id">
-        {{ sc1.name }}
-      </mat-option>
-      
-
-    </mat-select>
-  </mat-form-field>
-</div>
-
-
-<!-- 🔻 תת־קטגוריה 2 -->
-<div class="form-row" *ngIf="subCategory2List && subCategory2List.length">
-  <label for="subCategory2ID">תת־קטגוריה 2</label>
-
-  <mat-form-field appearance="outline" class="full-width">
-    <mat-select
-      id="subCategory2ID"
-      formControlName="subCategory2ID">
-
-      <!-- search inside dropdown -->
-      <mat-option disabled>
-        <input
-          matInput
-          placeholder="חיפוש תת־קטגוריה..."
-          [(ngModel)]="subCategory2Search"
-          name="subCategory2Search"
-          [ngModelOptions]="{ standalone: true }"
-          (click)="$event.stopPropagation()"
-          (keydown)="$event.stopPropagation()"
-        >
-      </mat-option>
-      
-      <mat-option
-        *ngFor="let sc2 of filteredSubCategory2()"
-        [value]="sc2.id">
-        {{ sc2.name }}
-      </mat-option>
-      
-      
-
-    </mat-select>
-  </mat-form-field>
-</div>
-
-
-    <!-- עדיפות (נשאר) -->
-    <div class="form-row" *ngIf="priorities && priorities.length">
-      <label for="priorityID">עדיפות</label>
-      <select id="priorityID" formControlName="priorityID">
-        <option *ngFor="let pr of priorities" [ngValue]="pr.id">
-          {{ pr.name }}
-        </option>
-      </select>
-    </div>
-
-    <!-- כפתור שמירה -->
-    <div class="actions">
-      <button type="submit" [disabled]="form.invalid || isSubmitting">
-        {{ isSubmitting ? 'שולח...' : 'שמור קריאה' }}
-      </button>
-    </div>
-
-    <!-- הודעות -->
-    <div class="message success" *ngIf="successMessage">
-      {{ successMessage }}
-    </div>
-    <div class="message error" *ngIf="errorMessage">
-      {{ errorMessage }}
-    </div>
-
-  </form>
+  
 </div>

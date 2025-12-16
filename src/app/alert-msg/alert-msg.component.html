@@ -1,1 +1,19 @@
-<p>alert-msg works!</p>
+<div class="alert-wrap" dir="rtl">
+
+    <mat-card class="alert-card" *ngIf="errorMessage">
+      <div class="alert-error">{{ errorMessage }}</div>
+    </mat-card>
+  
+    <mat-card class="alert-card" *ngIf="!isLoading && !errorMessage && alerts.length === 0">
+      <div class="alert-empty">אין הודעות מערכת</div>
+    </mat-card>
+  
+    <mat-card class="alert-card" *ngFor="let a of alerts; trackBy: trackById">
+      <div class="alert-row">
+        <mat-icon class="alert-icon">campaign</mat-icon>
+        <div class="alert-text">{{ a.messageText }}</div>
+      </div>
+    </mat-card>
+  
+  </div>
+  

@@ -1,0 +1,35 @@
+.alert-wrap {
+    display: grid;
+    gap: 10px;
+  }
+  
+  .alert-card {
+    border-radius: 12px;
+    padding: 10px 12px;
+  }
+  
+  .alert-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .alert-icon {
+    opacity: 0.8;
+  }
+  
+  .alert-text {
+    font-weight: 800;
+    opacity: 0.9;
+  }
+  
+  .alert-empty {
+    font-weight: 800;
+    opacity: 0.65;
+  }
+  
+  .alert-error {
+    font-weight: 900;
+    color: #b71c1c;
+  }
+  

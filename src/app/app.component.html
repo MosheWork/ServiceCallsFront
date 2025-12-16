@@ -14,7 +14,7 @@
           <mat-icon>list</mat-icon>
           <span>רשימת קריאות</span>
         </a>
-        <a mat-list-item routerLink="/service-calls-admin-config" (click)="drawer.close()">
+        <a mat-list-item routerLink="/ServiceCallsAdminConfig" (click)="drawer.close()">
             <mat-icon>settings</mat-icon>
             <span>הגדרות</span>
           </a>
@@ -22,7 +22,11 @@
           <mat-icon>add_circle</mat-icon>
           <span>פתיחת קריאה</span>
         </a>
-  
+        <a mat-list-item routerLink="/alert-msg-admin" (click)="drawer.close()">
+            <mat-icon>campaign</mat-icon>
+            <span>הודעות מערכת</span>
+          </a>
+        
         <!-- add more routes here -->
       </mat-nav-list>
     </mat-sidenav>

@@ -35,6 +35,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { AlertMsgComponent } from './alert-msg/alert-msg.component';
+import { AlertMsgAdminComponent } from './alert-msg-admin/alert-msg-admin.component';
 
 
 
@@ -47,7 +48,8 @@ import { AlertMsgComponent } from './alert-msg/alert-msg.component';
     ServiceCallEditComponent,
     ServiceCallsAdminConfigComponent,
     ServiceCallsDashboardComponent,
-    AlertMsgComponent
+    AlertMsgComponent,
+    AlertMsgAdminComponent
   ],
   imports: [
     BrowserModule,

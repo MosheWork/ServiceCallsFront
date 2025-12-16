@@ -6,6 +6,23 @@ import { environment } from '../../environments/environment';
 interface LookupItem {
   id: number;
   name: string;
+  usageCount?: number; // NEW
+
+}
+// ✅ AlertMSG model (same as admin page)
+export interface AlertMSGModel {
+  alertId: number;
+  componentKey: string;
+  messageText: string;
+  isEnabled: boolean;
+
+  createdAt: string;     // ISO string from API
+
+  priority: number;      // NEW
+  color?: string | null; // NEW (e.g. '#ef4444')
+
+  startAt?: string | null; // NEW
+  stopAt?: string | null;  // NEW
 }
 
 @Component({
@@ -15,6 +32,15 @@ interface LookupItem {
 })
 export class ServiceCallFormComponent implements OnInit {
 
+
+  alerts: AlertMSGModel[] = [];
+  alertsLoading = false;
+  alertsError = '';
+
+  isLoadingAlerts = false;
+
+// choose the key you will use in DB for this page:
+private readonly alertComponentKey = 'ServiceCallFormComponent';
   form!: FormGroup;
   isSubmitting = false;
   successMessage = '';
@@ -35,26 +61,28 @@ export class ServiceCallFormComponent implements OnInit {
   filteredMainCategories(): LookupItem[] {
     const term = (this.mainCategorySearch || '').toLowerCase().trim();
   
-    let list = this.mainCategories;
+    let list = this.mainCategories || [];
     if (term) {
-      list = list.filter(mc =>
-        (mc.name || '').toLowerCase().includes(term)
-      );
+      list = list.filter(mc => (mc.name || '').toLowerCase().includes(term));
     }
   
-    // לשים "אחר" בראש הרשימה
     const sorted = [...list];
     sorted.sort((a, b) => {
       const aIsOther = (a.name || '').trim() === 'אחר';
       const bIsOther = (b.name || '').trim() === 'אחר';
-  
       if (aIsOther && !bIsOther) return -1;
       if (!aIsOther && bIsOther) return 1;
-      return 0;
+  
+      const au = a.usageCount ?? 0;
+      const bu = b.usageCount ?? 0;
+      if (bu !== au) return bu - au;
+  
+      return (a.name || '').localeCompare(b.name || '', 'he');
     });
   
     return sorted;
   }
+  
   
   filteredSubCategory1(): LookupItem[] {
     const term = (this.subCategory1Search || '').toLowerCase().trim();
@@ -97,6 +125,8 @@ export class ServiceCallFormComponent implements OnInit {
     });
 
     this.loadLookups();
+    this.loadAlerts(this.alertComponentKey); // 'ServiceCallForm'
+
   }
 
   loadLookups(): void {
@@ -207,4 +237,98 @@ export class ServiceCallFormComponent implements OnInit {
         }
       });
   }
+
+  loadAlerts(componentKey: string): void {
+    this.alertsLoading = true;
+    this.alertsError = '';
+    this.alerts = [];
+  
+    const url = `${environment.apiBaseUrl}/api/AlertMSG`;
+    const params = new HttpParams().set('componentKey', componentKey);
+  
+    this.http.get<any[]>(url, { params }).subscribe({
+      next: (rows) => {
+  
+        const normalized: AlertMSGModel[] = (rows || []).map((x: any) => ({
+          alertId: x.alertId ?? x.AlertId,
+          componentKey: x.componentKey ?? x.ComponentKey,
+          messageText: x.messageText ?? x.MessageText,
+          isEnabled: x.isEnabled ?? x.IsEnabled,
+          createdAt: x.createdAt ?? x.CreatedAt,
+  
+          priority: x.priority ?? x.Priority ?? 2,
+          color: x.color ?? x.Color ?? null,
+          startAt: x.startAt ?? x.StartAt ?? null,
+          stopAt: x.stopAt ?? x.StopAt ?? null,
+        }));
+  
+        const list = normalized
+          .filter(a => this.shouldShowAlert(a))
+          .sort((a, b) => {
+            const pa = a.priority ?? 0;
+            const pb = b.priority ?? 0;
+            if (pb !== pa) return pb - pa;
+            return (this.toTime(b.createdAt) ?? 0) - (this.toTime(a.createdAt) ?? 0);
+          });
+  
+        this.alerts = list;
+        this.alertsLoading = false;
+      },
+      error: (e) => {
+        console.error(e);
+        this.alertsError = 'שגיאה בטעינת הודעות';
+        this.alertsLoading = false;
+      }
+    });
+  }
+  
+
+private now(): number {
+  return Date.now();
+}
+private toTime(v?: string | null): number | null {
+  if (!v) return null;
+  const t = new Date(v).getTime();
+  return isNaN(t) ? null : t;
+}
+shouldShowAlert(a: AlertMSGModel): boolean {
+  const start = this.toTime(a.startAt);
+  const stop = this.toTime(a.stopAt);
+  const n = this.now();
+
+  if (start !== null && start > n) return false;
+  if (stop !== null && stop < n) return false;
+  return (a.messageText || '').trim().length > 0;
+}
+
+priorityColor(p?: number): string {
+  // fallback colors if Color is null
+  switch (p) {
+    case 5: return '#b91c1c'; // red
+    case 4: return '#ea580c'; // orange
+    case 3: return '#ca8a04'; // amber
+    case 2: return '#2563eb'; // blue
+    case 1: return '#16a34a'; // green
+    default: return '#2563eb';
+  }
+}
+
+alertBorderColor(a: AlertMSGModel): string {
+  const c = (a.color || '').trim();
+  return c ? c : this.priorityColor(a.priority);
+}
+
+formatRange(a: AlertMSGModel): string {
+  const hasStart = !!a.startAt;
+  const hasStop = !!a.stopAt;
+
+  if (!hasStart && !hasStop) return '';
+
+  const startStr = hasStart ? new Date(a.startAt as string).toLocaleString('he-IL') : '';
+  const stopStr = hasStop ? new Date(a.stopAt as string).toLocaleString('he-IL') : '';
+
+  if (hasStart && hasStop) return `מוצג מ־${startStr} עד ${stopStr}`;
+  if (hasStart) return `מוצג החל מ־${startStr}`;
+  return `מוצג עד ${stopStr}`;
+}
 }

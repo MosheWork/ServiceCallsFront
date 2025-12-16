@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { AlertMsgAdminComponent } from './alert-msg-admin/alert-msg-admin.component';
+import { AlertMsgComponent } from './alert-msg/alert-msg.component';
 import { ServiceCallEditComponent } from './service-call-edit/service-call-edit.component';
 import { ServiceCallFormComponent } from './service-call-form/service-call-form.component';
 import { ServiceCallListComponent } from './service-call-list/service-call-list.component';
@@ -16,7 +18,7 @@ const routes: Routes = [
   { path: 'service-calls/:id', component: ServiceCallEditComponent } ,
   { path: 'ServiceCallsAdminConfig', component: ServiceCallsAdminConfigComponent } ,
   { path: 'serviceCallsDashboard', component: ServiceCallsDashboardComponent } ,
-
+  { path: 'alert-msg-admin', component: AlertMsgAdminComponent } ,
 
   // אופציונלי – דף 404
   { path: '**', redirectTo: 'service-call-list' }
