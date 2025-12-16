@@ -64,7 +64,7 @@ export class ServiceCallListComponent implements OnInit {
   newCallsCount = 0; 
 // 🔹 Date range filter for תאריך פתיחה
 
-UserName: string = '';
+UserName: string = 'אורח';
 profilePictureUrl: string = 'assets/default-user.png';
 loggedUser: string = '';
 
@@ -130,22 +130,47 @@ loggedUser: string = '';
       );
     }
     
-  
-  getUserDetailsFromDBByUserName(username: string): void {
-    this.http
-      .get<any>(`${environment.apiBaseUrl}/api/ServiceCRM/GetEmployeeInfo?username=${username.toUpperCase()}`)
-      .subscribe(
-        (data) => {
-          this.UserName = data?.userName || username;
-          this.profilePictureUrl = data?.profilePicture ? `${data.profilePicture}` : 'assets/default-user.png';
+    loadLoggedUser(): void {
+      // תמיד להציג משהו גם אם אין תשובה
+      this.loggedUser = '';
+      this.UserName = 'אורח';
+      this.profilePictureUrl = 'assets/default-user.png';
+    
+      this.authenticationService.getAuthentication().subscribe({
+        next: (response) => {
+          const full = (response?.message || '');
+          const user = full.includes('\\') ? full.split('\\')[1] : full;
+    
+          this.loggedUser = (user || '').toUpperCase();
+          this.UserName = this.loggedUser || 'אורח';
+    
+          if (this.loggedUser) {
+            this.getUserDetailsFromDBByUserName(this.loggedUser);
+          }
         },
-        (error) => {
-          console.error('Error fetching employee info:', error);
-          this.UserName = username;
-          this.profilePictureUrl = 'assets/default-user.png';
+        error: (err) => {
+          console.error('Authentication failed', err);
+          // נשארים על defaults (אורח + תמונת ברירת מחדל)
         }
-      );
-  }
+      });
+    }
+    
+    getUserDetailsFromDBByUserName(username: string): void {
+      this.http.get<any>(`${environment.apiBaseUrl}ServiceCRM/GetEmployeeInfo?username=${username.toUpperCase()}`)
+        .subscribe({
+          next: (data) => {
+            this.UserName = data?.userName || username || 'אורח';
+            this.profilePictureUrl = data?.profilePicture || 'assets/default-user.png';
+          },
+          error: (error) => {
+            console.error('Error fetching employee info:', error);
+            // fallback
+            this.UserName = username || 'אורח';
+            this.profilePictureUrl = 'assets/default-user.png';
+          }
+        });
+    }
+    
   
   loadData(): void {
     this.isLoading = true;

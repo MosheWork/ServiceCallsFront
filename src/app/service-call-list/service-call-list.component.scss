@@ -1,239 +1,400 @@
 /* ============================
-   מעטפת כללית למסך קריאות שירות
+   Service Call List Page
+   main centered + user card fixed right
    ============================ */
-   .service-call-list {
+   .service-call-page {
+    direction: rtl;
+    text-align: right;
+  
+    display: flex;
+    gap: 16px;
+  
     padding: 16px 24px;
-    max-width: 1400px;
+    background: #f3f5fb;
+    min-height: calc(100vh - 64px);
+  
+    box-sizing: border-box;
+  }
+  
+  /* כל עמודה */
+  .sc-col {
+    min-width: 0; /* חשוב כדי שהטבלה לא תדחוף רוחבים ותשבור */
+  }
+  
+  /* RIGHT 15% */
+  .sc-right {
+    flex: 0 0 15%;
+  }
+  
+  /* CENTER 70% */
+  .sc-center {
+    flex: 0 0 70%;
+  }
+  
+  /* LEFT 15% */
+  .sc-left {
+    flex: 0 0 15%;
+  }
+  
+  /* ----- User card ----- */
+  .sc-user-card {
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  }
+  
+  .sc-user-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+  
+  .sc-user-pic {
+    width: 34px;     /* קטן */
+    height: 34px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #eef2ff;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  
+  .sc-user-name {
+    font-weight: 700;
+    font-size: 13px;
+    color: #1a237e;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .sc-user-sub {
+    font-size: 12px;
+    color: #607d8b;
+  }
+  
+  /* Placeholder left */
+  .sc-side-placeholder {
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+    padding: 12px;
+  }
+  
+  .ph-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: #1a237e;
+  }
+  
+  .ph-sub {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #607d8b;
+  }
+  
+  /* Responsive: במסכים קטנים יורד לעמודה אחת */
+  @media (max-width: 1200px) {
+    .service-call-page {
+      flex-direction: column;
+    }
+    .sc-right, .sc-center, .sc-left {
+      flex: 0 0 auto;
+      width: 100%;
+    }
+  }
+  
+   .service-call-page {
+    direction: rtl;
+    text-align: right;
+  
+    background: #f3f5fb;
+    min-height: calc(100vh - 64px); /* אם יש toolbar למעלה */
+  
+    /* padding כללי למסך */
+    padding: 16px 24px;
+  
+    /* חשוב: התוכן לא יידחף בגלל כרטיס ימין */
+    position: relative;
+  }
+  
+  /* ---------- RIGHT: user card (fixed) ---------- */
+  .sc-right-col {
+    position: fixed;
+    right: 24px;
+    top: 84px; /* אם זה גבוה/נמוך אצלך - תשנה ל-70/90 */
+    width: 240px;
+    z-index: 10;
+  }
+  
+  .sc-user-card {
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  }
+  
+  .sc-user-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+  
+  /* קטן יותר כמו שביקשת */
+  .sc-user-pic {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #eef2ff;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+  
+  .sc-user-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  
+  .sc-user-name {
+    font-weight: 700;
+    font-size: 13px;
+    color: #1a237e;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .sc-user-sub {
+    font-size: 12px;
+    color: #607d8b;
+  }
+  
+  /* ---------- LEFT: main content (centered) ---------- */
+  .sc-main-col {
+    max-width: 1100px;
     margin: 0 auto;
-    background: #f3f5fb;   // רקע כללי בהיר
+    min-width: 0;
   
-    /* ---------- כותרת עליונה ---------- */
-    .header-card {
-      margin-bottom: 12px;
-      padding-inline: 20px;
-      border-radius: 10px;
-      background: #ffffff;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    /* כדי שהכרטיס הימני לא יכסה את התוכן */
+    padding-right: 270px; /* 240 רוחב + רווח */
+  }
   
-      .header-main {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
+  /* ============================
+     Header card
+     ============================ */
+  .header-card {
+    margin-bottom: 12px;
+    padding-inline: 20px;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   
-      .header-text {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        text-align: right;
-      }
-  
-      h1 {
-        margin: 0;
-        font-size: 24px;
-        font-weight: 600;
-        color: #1a237e;
-      }
-  
-      .header-subtitle {
-        font-size: 14px;
-        color: #555;
-      }
-  
-      .new-count {
-        font-weight: 700;
-        color: #1976d2;
-      }
-    }
-  
-    /* ---------- כרטיס פילטר עליון ---------- */
-    .filter-card {
-      margin-bottom: 12px;
-      border-radius: 10px;
-      background: #ffffff;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
-    }
-  
-    .filter-row {
+    .header-main {
       display: flex;
-      flex-wrap: nowrap;
-      gap: 12px;
-      align-items: center;   // יישור כפתורים וחיפוש באותו קו
-      padding: 12px 20px;
+      justify-content: space-between;
+      align-items: center;
     }
   
-    .filter-field {
-      flex: 1 1 auto;        // החיפוש תופס את כל הרוחב
-      min-width: 260px;
-    }
-  
-    .filter-buttons {
-      display: flex;
-      gap: 8px;
-      margin-right: auto;    // ב-RTL דוחף לשמאל
-    }
-  
-    .filter-buttons button {
-      min-width: 110px;
-    }
-  
-    /* ---------- מצב טעינה / שגיאה ---------- */
-    .loading-container {
+    .header-text {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      margin-top: 24px;
-  
-      .loading-text {
-        margin-top: 8px;
-      }
+      gap: 4px;
+      text-align: right;
     }
   
-    .error-card {
-      margin-top: 16px;
-      color: #b71c1c;
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 600;
+      color: #1a237e;
     }
   
-    /* ---------- טבלה ---------- */
-    .table-container {
-      overflow-x: auto;
+    .header-subtitle {
+      font-size: 14px;
+      color: #555;
     }
   
-    table {
-      width: 100%;
-      background: #ffffff;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
-  
-      th.mat-header-cell,
-      td.mat-cell {
-        text-align: right;
-        white-space: nowrap;
-      }
-  
-      th.mat-header-cell {
-        vertical-align: top; // כותרת + אייקון
-        background: #f8f9ff;
-        font-size: 13px;
-        color: #37474f;
-      }
-  
-      .no-data-row td {
-        text-align: center;
-        font-style: italic;
-      }
-  
-      .header-title {
-        font-weight: 500;
-        font-size: 13px;
-      }
-  
-      .header-filter-wrapper {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 4px;
-        padding: 2px 0;
-      }
-  
-      .header-filter-button {
-        width: 30px;
-        height: 30px;
-        min-width: 30px;
-        padding: 0;
-      }
-  
-      .header-filter-icon {
-        font-size: 18px;
-        opacity: 0.5;
-        transition: color 0.15s ease, opacity 0.15s ease;
-      }
-  
-      .header-filter-icon.active-filter {
-        color: #1976d2;
-        opacity: 1;
-      }
-  
-      /* sort icon תמיד נראה */
-      .mat-sort-header-container {
-        align-items: center;
-      }
-      .mat-sort-header-arrow {
-        opacity: 1 !important;
-        transform: translateY(0) !important;
-      }
-  
-      /* ----- כותרת תאריך + אייקונים ----- */
-      .header-date-filter {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        position: relative;  // anchor ל-input הנסתר
-      }
-  
-      .header-date-icon,
-      .header-date-clear {
-        width: 28px;
-        height: 28px;
-      }
-  
-      /* כשהפילטר פעיל – כחול */
-      .header-date-icon.active-filter mat-icon,
-      .active-filter mat-icon {
-        color: #1976d2;
-      }
-  
-      /* input של טווח תאריכים – מוסתר אך ממוקם מתחת לכותרת
-         כדי שה-picker ייפתח מתחת לעמודה */
-      .header-hidden-date-input {
-        position: absolute;
-        top: 100%;      // מתחת לכותרת
-        right: 0;       // מיושר לעמודה (RTL)
-        width: 0;
-        height: 0;
-        opacity: 0;
-        pointer-events: none;
-      }
+    .new-count {
+      font-weight: 700;
+      color: #1976d2;
     }
   }
   
   /* ============================
-     שורות הטבלה – מצב hover
+     Filter card
      ============================ */
+  .filter-card {
+    margin-bottom: 12px;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .filter-row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 20px;
+  }
+  
+  .filter-field {
+    flex: 1 1 auto;
+    min-width: 260px;
+  }
+  
+  .filter-buttons {
+    display: flex;
+    gap: 8px;
+    margin-right: auto; /* RTL: דוחף לשמאל */
+  }
+  
+  .filter-buttons button {
+    min-width: 110px;
+  }
+  
+  /* ============================
+     Loading / Error
+     ============================ */
+  .loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 24px;
+  
+    .loading-text {
+      margin-top: 8px;
+    }
+  }
+  
+  .error-card {
+    margin-top: 16px;
+    color: #b71c1c;
+    border-radius: 10px;
+  }
+  
+  /* ============================
+     Table
+     ============================ */
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  table {
+    width: 100%;
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+  
+    th.mat-header-cell,
+    td.mat-cell {
+      text-align: right;
+      white-space: nowrap;
+    }
+  
+    th.mat-header-cell {
+      vertical-align: top;
+      background: #f8f9ff;
+      font-size: 13px;
+      color: #37474f;
+    }
+  
+    .header-title {
+      font-weight: 500;
+      font-size: 13px;
+    }
+  
+    .header-filter-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 0;
+    }
+  
+    .header-filter-button {
+      width: 30px;
+      height: 30px;
+      min-width: 30px;
+      padding: 0;
+    }
+  
+    .header-filter-icon {
+      font-size: 18px;
+      opacity: 0.5;
+      transition: color 0.15s ease, opacity 0.15s ease;
+    }
+  
+    .header-filter-icon.active-filter {
+      color: #1976d2;
+      opacity: 1;
+    }
+  
+    .mat-sort-header-arrow {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+    }
+  
+    .header-date-filter {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      position: relative;
+    }
+  
+    .header-date-icon,
+    .header-date-clear {
+      width: 28px;
+      height: 28px;
+    }
+  
+    .header-date-icon.active-filter mat-icon,
+    .active-filter mat-icon {
+      color: #1976d2;
+    }
+  
+    .header-hidden-date-input {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+  
+  /* clickable rows */
   .clickable-row {
     cursor: pointer;
     transition: background-color 0.15s ease;
   }
-  
   .clickable-row:hover {
     background: #f0f0f0;
   }
   
   /* ============================
-     תוכן ה-dropdown של הפילטר (mat-menu)
+     Filter dropdown menu (mat-menu)
      ============================ */
-  
   .filter-menu {
     padding: 8px 12px;
-    max-height: 260px;     // גובה מקסימלי – גלילה אם עובר
-    width: 240px;          // רוחב נעים
+    max-height: 260px;
+    width: 240px;
     box-sizing: border-box;
     overflow-y: auto;
-    background: #e9f8ff;   // רקע בהיר
+    background: #e9f8ff;
     border-radius: 4px;
   }
   
-  /* שורה עליונה של הכפתורים בחר הכל / אפס סנן */
   .filter-menu-actions {
     display: flex;
-    flex-direction: row;
     justify-content: space-between;
     gap: 8px;
     margin-bottom: 6px;
   }
   
-  /* כפתורי הפעולה בתוך ה-dropdown */
   .filter-action-btn {
     flex: 1 1 0;
     min-width: 0;
@@ -242,33 +403,43 @@
     line-height: 24px;
   }
   
-  /* כפתור "אפס סנן" – טיפה מודגש בצבע */
   .filter-action-btn.reset {
     border-color: #e53935;
     color: #e53935;
   }
   
-  /* רשימת ה-checkboxים בתוך הפילטר */
   .filter-options {
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
   
-  /* כל checkbox – padding קטן ו-hover נחמד */
   .filter-options .mat-mdc-checkbox {
     padding: 2px 4px;
     border-radius: 4px;
   }
   
-  /* צבע hover לשורה של פילטר */
   .filter-options .mat-mdc-checkbox:hover {
-    background-color: rgba(25, 118, 210, 0.08); // כחול עדין ב-hover
+    background-color: rgba(25, 118, 210, 0.08);
   }
   
-  /* טקסט label בתוך ה-checkbox */
   .filter-options .mat-mdc-checkbox .mdc-label {
     color: #1f2933;
     font-size: 13px;
+  }
+  
+  /* ============================
+     Responsive
+     ============================ */
+  @media (max-width: 1200px) {
+    .sc-main-col {
+      padding-right: 0; /* אין מקום לכרטיס בצד */
+    }
+  
+    .sc-right-col {
+      position: static; /* הכרטיס יורד למעלה/בתוך הזרימה */
+      width: 100%;
+      margin-bottom: 12px;
+    }
   }
   
