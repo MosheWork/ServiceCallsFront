@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../environments/environment';
+import { AuthenticationService } from '../services/authentication-service/authentication-service.service'; 
+
 
 interface LookupItem {
   id: number;
@@ -9,6 +11,20 @@ interface LookupItem {
   usageCount?: number; // NEW
 
 }
+interface EmployeeInfo {
+  userName: string | null;
+  profilePicture: string | null;
+  idNo: string | null;
+}
+
+interface ServiceCallClosedStatsModel {
+  id_No: string | null;
+  userInChargeID: number | null;
+  displayName: string | null;
+  closedToday: number;
+  closedThisMonth: number;
+}
+
 // ✅ AlertMSG model (same as admin page)
 export interface AlertMSGModel {
   alertId: number;
@@ -23,7 +39,21 @@ export interface AlertMSGModel {
 
   startAt?: string | null; // NEW
   stopAt?: string | null;  // NEW
+
+
 }
+interface UsersModel {
+  employeeID: number;
+  jobTitleDescription: string | null;
+  name: string | null;
+  adUserName: string | null;
+  email: string | null;
+  cellNumber: string | null;
+  profilePicture: string | null;
+  departnentDescripton: string | null;
+}
+
+
 
 @Component({
   selector: 'app-service-call-form',
@@ -32,6 +62,19 @@ export interface AlertMSGModel {
 })
 export class ServiceCallFormComponent implements OnInit {
 
+  UserName: string = 'אורח';
+  profilePictureUrl: string = 'assets/default-user.png';
+  loggedUser: string = '';
+  userIdNo: string = '';
+  userStatsError = '';
+defaultIdNo: string = '039558382';
+defaultAdUserName = 'MMAMAN';
+
+
+jobTitle: string = '';
+department: string = '';
+userInfoError = '';
+cellNumber: string = '';
 
   alerts: AlertMSGModel[] = [];
   alertsLoading = false;
@@ -101,8 +144,10 @@ private readonly alertComponentKey = 'ServiceCallFormComponent';
   }
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient
-  ) { }
+    private http: HttpClient,
+    private authenticationService: AuthenticationService
+  ) {}
+  
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -126,9 +171,63 @@ private readonly alertComponentKey = 'ServiceCallFormComponent';
 
     this.loadLookups();
     this.loadAlerts(this.alertComponentKey); // 'ServiceCallForm'
+    this.loadLoggedUser();               // ✅ יביא משתמש מחובר + idNo + סטטיסטיקה
+  // ✅ TEST: ברירת מחדל MMAMAN מתוך /api/Users
+  this.loadUserCardFromUsers('MMAMAN');
+//לשנות באמיתי לזה 
+  //this.loadUserCardFromUsers(this.defaultAdUserName);
 
   }
-
+  loadLoggedUser(): void {
+    this.loggedUser = '';
+    this.UserName = 'אורח';
+    this.profilePictureUrl = 'assets/default-user.png';
+  
+    this.authenticationService.getAuthentication().subscribe({
+      next: (response) => {
+        const full = (response?.message || '');
+        const user = full.includes('\\') ? full.split('\\')[1] : full;
+  
+        this.loggedUser = (user || '').toUpperCase();
+        this.UserName = this.loggedUser || 'אורח';
+  
+        if (this.loggedUser) {
+          this.getUserDetailsFromDBByUserName(this.loggedUser);
+        }
+      },
+      error: (err) => {
+        console.error('Authentication failed', err);
+      }
+    });
+  }
+  
+  getUserDetailsFromDBByUserName(username: string): void {
+    this.http.get<EmployeeInfo>(`${environment.apiBaseUrl}/api/ServiceCRM/GetEmployeeInfo`, {
+      params: { username: username.toUpperCase() }
+    }).subscribe({
+      next: (data) => {
+        this.UserName = data?.userName || username || 'אורח';
+        this.profilePictureUrl = data?.profilePicture || 'assets/default-user.png';
+  
+        // ✅ למלא אוטומטית "משתמש פותח"
+        this.form.patchValue({ requestUser: this.UserName });
+  
+        const idNo = (data?.idNo || '').trim();
+        this.userIdNo = idNo;
+  
+       
+      },
+      error: (error) => {
+        console.error('Error fetching employee info:', error);
+        this.UserName = username || 'אורח';
+        this.profilePictureUrl = 'assets/default-user.png';
+        this.userStatsError = 'לא ניתן לטעון פרטי משתמש';
+  
+        // fallback: למלא requestUser ב־AD
+        this.form.patchValue({ requestUser: this.UserName });
+      }
+    });
+  }
   loadLookups(): void {
     // Main categories
     this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/api/ServiceCalls/MainCategories`)
@@ -331,4 +430,63 @@ formatRange(a: AlertMSGModel): string {
   if (hasStart) return `מוצג החל מ־${startStr}`;
   return `מוצג עד ${stopStr}`;
 }
+
+private normalizeAd(v: string | null | undefined): string {
+  if (!v) return '';
+  let s = (v + '').trim();
+  if (s.includes('\\')) s = s.split('\\').pop() || s; // TZMC\MMAMAN -> MMAMAN
+  return s.toUpperCase();
+}
+
+loadUserCardFromUsers(adUserName: string): void {
+  this.userInfoError = '';
+
+  this.http.get<UsersModel[]>(`${environment.apiBaseUrl}/api/Users`).subscribe({
+    next: (list) => {
+      const target = this.normalizeAd(adUserName);
+
+      const user = (list || []).find(u => this.normalizeAd(u.adUserName) === target);
+
+      if (!user) {
+        this.UserName = adUserName || 'אורח';
+        this.profilePictureUrl = 'assets/default-user.png';
+        this.jobTitle = '';
+        this.department = '';
+        this.cellNumber = '';
+        this.userInfoError = 'לא נמצא משתמש ב־/api/Users';
+        return;
+      }
+
+      this.UserName = user.name || adUserName || 'אורח';
+      this.jobTitle = user.jobTitleDescription || '';
+      this.department = user.departnentDescripton || '';
+      this.cellNumber = user.cellNumber || '';
+      this.profilePictureUrl = this.normalizeProfilePicture(user.profilePicture);
+
+      this.form.patchValue({ requestUser: this.UserName });
+    },
+    error: (err) => {
+      console.error(err);
+      this.userInfoError = 'שגיאה בטעינת משתמשים';
+    }
+  });
+}
+
+private normalizeProfilePicture(pic: string | null): string {
+  if (!pic) return 'assets/default-user.png';
+
+  const p = pic.trim();
+
+  // אם זה כבר URL
+  if (p.startsWith('http://') || p.startsWith('https://') || p.startsWith('/')) return p;
+
+  // אם זה Base64 (בלי prefix)
+  if (/^[A-Za-z0-9+/=]+$/.test(p) && p.length > 100) {
+    return `data:image/jpeg;base64,${p}`;
+  }
+
+  // fallback
+  return 'assets/default-user.png';
+}
+
 }

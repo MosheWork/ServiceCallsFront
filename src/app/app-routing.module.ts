@@ -12,13 +12,18 @@ import { ServiceCallsDashboardComponent } from './service-calls-dashboard/servic
 const routes: Routes = [
   { path: '', redirectTo: 'service-call/new', pathMatch: 'full' },
 
-  // טופס פתיחת קריאת שירות
-  { path: 'service-call/new', component: ServiceCallFormComponent },
-  { path: 'service-call-list', component: ServiceCallListComponent },
-  { path: 'service-calls/:id', component: ServiceCallEditComponent } ,
-  { path: 'ServiceCallsAdminConfig', component: ServiceCallsAdminConfigComponent } ,
-  { path: 'serviceCallsDashboard', component: ServiceCallsDashboardComponent } ,
-  { path: 'alert-msg-admin', component: AlertMsgAdminComponent } ,
+// טופס פתיחת קריאת שירות
+{ path: 'service-call/new', component: ServiceCallFormComponent, data: { title: 'פתיחת קריאה' } },
+
+{ path: 'service-call-list', component: ServiceCallListComponent, data: { title: 'רשימת קריאות' } },
+
+{ path: 'service-calls/:id', component: ServiceCallEditComponent, data: { title: 'עריכת קריאה' } },
+
+{ path: 'ServiceCallsAdminConfig', component: ServiceCallsAdminConfigComponent, data: { title: 'הגדרות' } },
+
+{ path: 'serviceCallsDashboard', component: ServiceCallsDashboardComponent, data: { title: 'דשבורד קריאות' } },
+
+{ path: 'alert-msg-admin', component: AlertMsgAdminComponent, data: { title: 'הודעות מערכת' } },
 
   // אופציונלי – דף 404
   { path: '**', redirectTo: 'service-call-list' }

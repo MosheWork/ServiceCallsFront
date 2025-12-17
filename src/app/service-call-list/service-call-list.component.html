@@ -2,19 +2,59 @@
 
   <div class="service-call-page" dir="rtl">
 
-    <!-- RIGHT 15% -->
-    <div class="sc-col sc-right">
-      <mat-card class="sc-user-card">
-        <div class="sc-user-row">
-          <img class="sc-user-pic" [src]="profilePictureUrl || 'assets/default-user.png'" alt="user" />
-          <div class="sc-user-text">
-            <div class="sc-user-name">{{ UserName || loggedUser || 'אורח' }}</div>
-            <div class="sc-user-sub">מחובר</div>
-          </div>
-        </div>
-      </mat-card>
+  <!-- RIGHT 15% - user card -->
+<div class="sc-col sc-right">
+
+  <mat-card class="sc-user-card">
+    <div class="sc-user-row">
+      <img
+        class="sc-user-pic"
+        [src]="profilePictureUrl || 'assets/default-user.png'"
+        alt="user"
+        (error)="profilePictureUrl = 'assets/default-user.png'"
+      />
+      <div class="sc-user-text">
+        <div class="sc-user-name">{{ UserName || loggedUser || 'אורח' }}</div>
+        <div class="sc-user-sub">מחובר</div>
+      </div>
     </div>
-  
+  </mat-card>
+
+  <!-- ✅ NEW: user stats card (same width) -->
+  <mat-card class="sc-user-card sc-user-stats-card">
+    <div class="sc-user-stats-title">סטטיסטיקה אישית</div>
+
+    <div class="sc-user-stats-gauges">
+      <div class="gauge-item">
+        <ngx-gauge
+          [size]="120"
+          [thick]="10"
+          [value]="closedTodayCount"
+          [max]="closedTodayMax"
+          [label]="'נסגרו היום'"
+          [append]="' קריאות'">
+        </ngx-gauge>
+      </div>
+
+      <div class="gauge-item">
+        <ngx-gauge
+          [size]="120"
+          [thick]="10"
+          [value]="closedMonthCount"
+          [max]="closedMonthMax"
+          [label]="'נסגרו החודש'"
+          [append]="' קריאות'">
+        </ngx-gauge>
+      </div>
+    </div>
+
+    <div class="sc-user-stats-hint" *ngIf="userStatsError">
+      {{ userStatsError }}
+    </div>
+  </mat-card>
+
+</div>
+
     <!-- MIDDLE 70% -->
     <div class="sc-col sc-center">
      

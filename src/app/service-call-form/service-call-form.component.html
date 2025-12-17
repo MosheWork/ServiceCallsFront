@@ -1,5 +1,52 @@
 <div class="service-call-page" >
-
+  <mat-card class="sc-user-card" dir="rtl">
+    <!-- user -->
+    <div class="sc-user-header">
+      <div class="sc-user-welcome">
+        <div class="sc-user-welcome-title">ברוך הבא 👋</div>
+        <div class="sc-user-welcome-sub">שמחים לראות אותך במערכת קריאות השירות</div>
+      </div>
+  
+      <span class="sc-user-status">מחובר</span>
+    </div>
+  
+    <!-- Body -->
+    <div class="sc-user-body" dir="rtl">
+      <div class="sc-user-avatar-wrap">
+        <img
+          class="sc-user-pic"
+          [src]="profilePictureUrl || 'assets/default-user.png'"
+          alt="user"
+          (error)="profilePictureUrl = 'assets/default-user.png'"
+        />
+      </div>
+  
+      <div class="sc-user-details">
+        <div class="sc-user-name">
+          {{ (jobTitle + ' ' + (UserName || loggedUser || 'אורח')) }}
+        </div>
+  
+        <div class="sc-user-lines">
+          <div class="sc-user-line">
+            <span class="sc-user-label">מחלקה:</span>
+            <span class="sc-user-value">{{ department || '—' }}</span>
+          </div>
+  
+          <div class="sc-user-line">
+            <span class="sc-user-label">טלפון:</span>
+            <span class="sc-user-value">{{ cellNumber || '—' }}</span>
+          </div>
+  
+        </div>
+  
+        <div class="sc-user-error" *ngIf="userInfoError">
+          {{ userInfoError }}
+        </div>
+      </div>
+    </div>
+  </mat-card>
+  
+  
 
   <!-- ✅ טופס (כמו שיש לך) -->
   <div class="sc-form-col">

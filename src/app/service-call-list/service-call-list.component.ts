@@ -37,6 +37,20 @@ export interface ServiceCallFullModel {
   serviceRequestTypeName: string | null;
 }
 
+interface EmployeeInfo {
+  userName: string | null;
+  profilePicture: string | null;
+  idNo: string | null;
+}
+
+interface ServiceCallClosedStatsModel {
+  id_No: string | null;
+  userInChargeID: number | null;
+  displayName: string | null;
+  closedToday: number;
+  closedThisMonth: number;
+}
+
 @Component({
   selector: 'app-service-call-list',
   templateUrl: './service-call-list.component.html',
@@ -67,13 +81,22 @@ export class ServiceCallListComponent implements OnInit {
 UserName: string = 'אורח';
 profilePictureUrl: string = 'assets/default-user.png';
 loggedUser: string = '';
+closedTodayCount: number = 0;
+closedMonthCount: number = 0;
 
+// כדי שהגייג' לא יהיה תמיד max=100
+closedTodayMax: number = 10;
+closedMonthMax: number = 50;
+userInfoError = '';
+
+userStatsError = '';
   isLoading = false;
   errorMessage = '';
   entryDateFrom: Date | null = null;
   entryDateTo: Date | null = null;
   // 🔎 חיפוש חופשי
   searchText = '';
+  defaultIdNo: string = '039558382';
 
   // 🔽 מערכי בחירה לכל עמודה (multi-select)
   selectedTitles: string[] = [];
@@ -110,6 +133,14 @@ loggedUser: string = '';
   
 
     ngOnInit(): void {
+      // טוען טבלה
+      this.loadData();
+    
+      // טוען סטטיסטיקה עם ברירת מחדל
+      this.loadUserClosedStats(this.defaultIdNo);
+      
+
+      // אם ה-auth מצליח בהמשך ומביא idNo אמיתי, אפשר להחליף (כרגע נשאיר דיפולט)
       this.authenticationService.getAuthentication().subscribe(
         (response) => {
           const raw = response?.message || '';
@@ -117,59 +148,64 @@ loggedUser: string = '';
     
           this.loggedUser = (user || '').toUpperCase();
           this.getUserDetailsFromDBByUserName(this.loggedUser);
-    
-          // ממשיכים כרגיל
-          this.loadData();
         },
         (error) => {
           console.error('❌ Authentication Failed:', error);
-    
-          // גם אם auth נכשל – עדיין נטען את הטבלה
-          this.loadData();
         }
       );
+      this.loadLoggedUser(); 
     }
     
     loadLoggedUser(): void {
-      // תמיד להציג משהו גם אם אין תשובה
+      this.userInfoError = '';
       this.loggedUser = '';
       this.UserName = 'אורח';
       this.profilePictureUrl = 'assets/default-user.png';
     
       this.authenticationService.getAuthentication().subscribe({
         next: (response) => {
-          const full = (response?.message || '');
-          const user = full.includes('\\') ? full.split('\\')[1] : full;
+          const raw = (response?.message || '');
+          const user = raw.includes('\\') ? raw.split('\\')[1] : raw;
     
           this.loggedUser = (user || '').toUpperCase();
-          this.UserName = this.loggedUser || 'אורח';
     
           if (this.loggedUser) {
             this.getUserDetailsFromDBByUserName(this.loggedUser);
+          } else {
+            // fallback: להשאיר "אורח"
+            this.UserName = 'אורח';
           }
         },
         error: (err) => {
-          console.error('Authentication failed', err);
-          // נשארים על defaults (אורח + תמונת ברירת מחדל)
+          console.error('❌ Authentication Failed:', err);
+          this.userInfoError = 'לא ניתן לזהות משתמש מחובר';
+        }
+      });
+    }
+    getUserDetailsFromDBByUserName(username: string): void {
+      this.http.get<EmployeeInfo>(`${environment.apiBaseUrl}/api/ServiceCRM/GetEmployeeInfo`, {
+        params: { username: username.toUpperCase() }
+      }).subscribe({
+        next: (data) => {
+          this.UserName = data?.userName || username || 'אורח';
+          this.profilePictureUrl = data?.profilePicture || 'assets/default-user.png';
+    
+          const idNo = (data?.idNo || '').trim();
+          if (idNo) {
+            this.loadUserClosedStats(idNo);
+          } else {
+            this.userStatsError = 'לא נמצא ID למשתמש (idNo)';
+          }
+        },
+        error: (error) => {
+          console.error('Error fetching employee info:', error);
+          this.UserName = username || 'אורח';
+          this.profilePictureUrl = 'assets/default-user.png';
+          this.userStatsError = 'לא ניתן לטעון פרטי משתמש';
         }
       });
     }
     
-    getUserDetailsFromDBByUserName(username: string): void {
-      this.http.get<any>(`${environment.apiBaseUrl}ServiceCRM/GetEmployeeInfo?username=${username.toUpperCase()}`)
-        .subscribe({
-          next: (data) => {
-            this.UserName = data?.userName || username || 'אורח';
-            this.profilePictureUrl = data?.profilePicture || 'assets/default-user.png';
-          },
-          error: (error) => {
-            console.error('Error fetching employee info:', error);
-            // fallback
-            this.UserName = username || 'אורח';
-            this.profilePictureUrl = 'assets/default-user.png';
-          }
-        });
-    }
     
   
   loadData(): void {
@@ -555,5 +591,28 @@ loggedUser: string = '';
       const v = value || '';
       return selected.includes(v);
     }
-  
+    private loadUserClosedStats(idNo: string): void {
+      this.userStatsError = '';
+    
+      const url = `${environment.apiBaseUrl}/api/ServiceCalls/ClosedStatsByIdNo`;
+      this.http.get<ServiceCallClosedStatsModel>(url, { params: { idNo } })
+        .subscribe({
+          next: (res) => {
+            this.closedTodayCount = res?.closedToday ?? 0;
+            this.closedMonthCount = res?.closedThisMonth ?? 0;
+    
+            // כדי שהגייג' לא ייתקע על מקס קטן/גדול מדי
+            this.closedTodayMax = Math.max(5, this.closedTodayCount);
+            this.closedMonthMax = Math.max(10, this.closedMonthCount);
+          },
+          error: (err) => {
+            console.error('ClosedStatsByIdNo failed', err);
+            this.closedTodayCount = 0;
+            this.closedMonthCount = 0;
+            this.userStatsError = 'לא ניתן לטעון סטטיסטיקה אישית';
+          }
+        });
+    }
+
+    
 }

@@ -52,7 +52,10 @@ export class ServiceCallEditComponent implements OnInit {
   form!: FormGroup;
   isLoading = true;
   errorMessage = '';
-
+  loggedUser: string | null = null;
+  UserName: string | null = null;
+  profilePictureUrl: string | null = null;
+  
   callId!: number;
 
   // lookups
@@ -74,34 +77,36 @@ export class ServiceCallEditComponent implements OnInit {
 
   ngOnInit(): void {
     this.callId = +this.route.snapshot.paramMap.get('id')!;
-
+  
+    // ✅ defaults כדי שתמיד יראו משהו
+    this.loggedUser = 'אורח';
+    this.UserName = 'אורח';
+    this.profilePictureUrl = 'assets/default-user.png';
+  
     this.buildForm();
     this.loadLookups();
-
+  
     this.http.get<ServiceCallModel>(`${environment.apiBaseUrl}/api/ServiceCalls/${this.callId}`)
       .subscribe({
         next: call => {
           this.form.patchValue(call);
-
-          // load sub categories based on mainCategory if needed
+  
           if (call.mainCategoryID) {
             this.loadSub1(call.mainCategoryID, () => {
-              if (call.subCategory1ID) {
-                // ⭐ עכשיו יש לנו loadSub2 אמיתי
-                this.loadSub2(call.subCategory1ID);
-              }
+              if (call.subCategory1ID) this.loadSub2(call.subCategory1ID);
             });
           }
+  
           this.applyUsersFilter();
           this.isLoading = false;
         },
-        error: err => {
+        error: () => {
           this.errorMessage = 'שגיאה בטעינת הקריאה';
           this.isLoading = false;
         }
       });
   }
-
+  
   private buildForm() {
     this.form = this.fb.group({
       title: [null],
