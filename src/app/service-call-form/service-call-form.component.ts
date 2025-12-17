@@ -79,7 +79,8 @@ cellNumber: string = '';
   alerts: AlertMSGModel[] = [];
   alertsLoading = false;
   alertsError = '';
-
+  usersList: UsersModel[] = [];
+  requestUserSearch = '';
   isLoadingAlerts = false;
 
 // choose the key you will use in DB for this page:
@@ -174,8 +175,12 @@ private readonly alertComponentKey = 'ServiceCallFormComponent';
     this.loadLoggedUser();               // ✅ יביא משתמש מחובר + idNo + סטטיסטיקה
   // ✅ TEST: ברירת מחדל MMAMAN מתוך /api/Users
   this.loadUserCardFromUsers('MMAMAN');
+  
 //לשנות באמיתי לזה 
   //this.loadUserCardFromUsers(this.defaultAdUserName);
+
+  this.loadUsers();
+
 
   }
   loadLoggedUser(): void {
@@ -189,6 +194,8 @@ private readonly alertComponentKey = 'ServiceCallFormComponent';
         const user = full.includes('\\') ? full.split('\\')[1] : full;
   
         this.loggedUser = (user || '').toUpperCase();
+        this.trySetDefaultRequestUser();
+
         this.UserName = this.loggedUser || 'אורח';
   
         if (this.loggedUser) {
@@ -488,5 +495,64 @@ private normalizeProfilePicture(pic: string | null): string {
   // fallback
   return 'assets/default-user.png';
 }
+loadUsers(): void {
+  this.http.get<UsersModel[]>(`${environment.apiBaseUrl}/api/Users`)
+    .subscribe({
+      next: (list) => {
+        this.usersList = (list || []).map(u => ({
+          ...u,
+          displayText: this.buildUserDisplayText(u)
+        })) as any;
+
+        this.trySetDefaultRequestUser();
+      },
+      error: (err) => {
+        console.error('loadUsers failed', err);
+        this.usersList = [];
+      }
+    });
+}
+private buildUserDisplayText(u: UsersModel): string {
+  const jt = (u.jobTitleDescription || '').trim();
+  const nm = (u.name || '').trim();
+  const t = `${jt} ${nm}`.trim();
+  return t || (u.adUserName || '').trim() || '—';
+}
+filteredUsers(): any[] {
+  const term = (this.requestUserSearch || '').toLowerCase().trim();
+  let list: any[] = this.usersList || [];
+
+  if (term) {
+    list = list.filter(u => {
+      const blob = [
+        u.displayText,
+        u.name,
+        u.jobTitleDescription,
+        u.departnentDescripton,
+        u.adUserName,
+        u.email
+      ].join(' ').toLowerCase();
+
+      return blob.includes(term);
+    });
+  }
+
+  return [...list].sort((a, b) => (a.displayText || '').localeCompare(b.displayText || '', 'he'));
+}
+
+
+private trySetDefaultRequestUser(): void {
+  const current = (this.form?.value?.requestUser || '').trim();
+  if (current) return;
+
+  const targetAd = (this.loggedUser || this.defaultAdUserName || '').trim().toUpperCase();
+  if (!targetAd) return;
+
+  const u: any = (this.usersList || []).find(x => (x.adUserName || '').trim().toUpperCase() === targetAd);
+  if (u?.displayText) {
+    this.form.patchValue({ requestUser: u.displayText });
+  }
+}
+
 
 }

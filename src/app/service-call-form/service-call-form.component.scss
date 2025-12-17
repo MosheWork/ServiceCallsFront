@@ -7,57 +7,55 @@
    GRID LAYOUT
    ========================= */
    .service-call-page {
-    /* IMPORTANT:
-       grid in LTR so columns behave predictably.
-       content inside columns stays RTL. */
     direction: ltr;
-  
     display: grid;
-    grid-template-columns: 1fr minmax(0, 980px) 320px; /* spacer | form | alerts */
-    grid-template-areas: ". form alerts";
+  
+    grid-template-columns:
+      minmax(260px, 20%)
+      minmax(0, 60%)
+      minmax(260px, 20%);
+  
+    grid-template-areas: "alerts form user";
     gap: 1rem;
     padding: 1rem;
-    align-items: start;
-    box-sizing: border-box;
   }
+
+  .sc-alert-col { grid-area: alerts; direction: rtl; }
+  .sc-form-col  { grid-area: form;   direction: rtl; min-width: 0; }
+  .sc-user-col  { grid-area: user;   direction: rtl; }
   
-  .sc-form-col {
-    grid-area: form;
-    min-width: 0;
-    direction: rtl;
-  }
-  
-  .sc-alert-col {
-    grid-area: alerts;
-    min-width: 0;
-    direction: rtl;
-  
+  /* אם אתה רוצה שהעממודות הצדדיות יישארו sticky */
+  .sc-alert-col,
+  .sc-user-col {
     position: sticky;
     top: 1rem;
     align-self: start;
   }
   
-  /* medium screens: remove spacer column */
-  @media (max-width: 1200px) {
-    .service-call-page {
-      grid-template-columns: minmax(0, 1fr) 300px; /* form | alerts */
-      grid-template-areas: "form alerts";
-    }
+/* מסכים בינוניים */
+@media (max-width: 1200px) {
+  .service-call-page {
+    grid-template-columns: 300px minmax(0, 1fr);
+    grid-template-areas:
+      "user form"
+      "alerts form";
   }
-  
-  /* small screens: alerts under form */
-  @media (max-width: 900px) {
-    .service-call-page {
-      grid-template-columns: 1fr;
-      grid-template-areas:
-        "form"
-        "alerts";
-    }
-  
-    .sc-alert-col {
-      position: static;
-    }
+  .sc-alert-col,
+  .sc-user-col {
+    position: static;
   }
+}
+
+/* מובייל */
+@media (max-width: 900px) {
+  .service-call-page {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "user"
+      "form"
+      "alerts";
+  }
+}
   
   /* =========================
      ALERTS PANEL UI
@@ -119,7 +117,7 @@
      ========================= */
   .service-call-form {
     width: 100%;
-    max-width: 980px; /* matches center column */
+    //max-width: 980px; /* matches center column */
     margin: 0;        /* no auto-centering inside grid */
     padding: 1.75rem 2rem;
     border-radius: 12px;
@@ -449,4 +447,47 @@
     color: #b91c1c;
     font-weight: 700;
   }
-  
+  /* אם אין לך את הפונטים מותקנים – ראה למטה איך מוסיפים Google Fonts */
+.sc-user-card,
+.sc-user-card * {
+  font-family: 'Rubik', 'Assistant', 'Heebo', Arial, sans-serif;
+}
+
+.sc-user-name {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.sc-user-line {
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.sc-user-label {
+  font-weight: 700;
+  opacity: 0.75;
+}
+
+.sc-user-value {
+  font-weight: 600;
+}
+.sc-user-value {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.3px;
+}
+
+.sc-user-opt-sub {
+  font-size: 12px;
+  opacity: 0.75;
+  margin-right: 6px;
+}
+.req-user-title {
+  font-weight: 700;
+}
+
+.req-user-sub {
+  font-size: 12px;
+  opacity: 0.75;
+  margin-right: 6px;
+}
