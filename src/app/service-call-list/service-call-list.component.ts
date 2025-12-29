@@ -72,6 +72,7 @@ export class ServiceCallListComponent implements OnInit {
     'teamInChargeName',
     'userInChargeName'
   ];
+  public readonly alertComponentKey = 'ServiceCallListComponent';
 
   dataSource = new MatTableDataSource<ServiceCallFullModel>([]);
   allCalls: ServiceCallFullModel[] = [];

@@ -49,6 +49,7 @@ export class AlertMsgAdminComponent implements OnInit, AfterViewInit {
   componentKeys: string[] = [
     'ServiceCallsDashboard',
     'ServiceCallsAdminConfig',
+    'ServiceCallListComponent',
     'ServiceCallFormComponent'
   ];
 

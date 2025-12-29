@@ -291,7 +291,7 @@
   
     th.mat-header-cell,
     td.mat-cell {
-      text-align: right;
+      text-align: center;
       white-space: nowrap;
     }
   
@@ -442,4 +442,230 @@
       margin-bottom: 12px;
     }
   }
-  
+  /* ============================
+   RIGHT column (two user cards)
+   ============================ */
+.sc-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* רווח בין 2 הכרטיסים */
+}
+
+/* הכרטיסים עצמם */
+.sc-user-card {
+  padding: 14px 16px;     /* ✅ padding לכרטיס */
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* אם יש לך padding גם ב-row, מורידים כדי שלא יהיה כפול */
+.sc-user-row {
+  padding: 0;             /* ✅ הכרטיס נותן padding */
+}
+
+/* ============================
+   User stats card
+   ============================ */
+.sc-user-stats-card {
+  padding: 14px 16px;     /* ✅ עוד קצת אוויר */
+}
+
+.sc-user-stats-title {
+  font-weight: 800;
+  font-size: 14px;
+  color: #1a237e;
+  text-align: center;     /* ✅ כותרת באמצע */
+  margin-bottom: 10px;
+}
+
+/* מרכז את כל אזור הגייג'ים */
+.sc-user-stats-gauges {
+  display: flex;
+  flex-direction: column; /* ✅ בעמודה כי יש רק 15% רוחב */
+  align-items: center;    /* ✅ מרכז אופקי */
+  justify-content: center;
+  gap: 14px;
+}
+
+/* כל gauge באמצע */
+.gauge-item {
+  width: 100%;
+  display: flex;
+  justify-content: center; /* ✅ מרכז */
+  align-items: center;
+}
+
+/* ngx-gauge לפעמים מתנהג כמו inline - נכריח block ונמרכז */
+.gauge-item ngx-gauge {
+  display: block;
+  margin: 0 auto;
+}
+
+.sc-user-stats-hint {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #b71c1c;
+  text-align: center;
+}
+/* LEFT column spacing */
+.sc-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;          /* רווח בין ה-alert לבין הכרטיס העתידי */
+  padding: 8px;       /* ✅ padding פנימי לעמודה */
+  box-sizing: border-box;
+}
+
+/* make the app-alert-msg behave like a block card with spacing */
+.sc-left app-alert-msg {
+  display: block;
+}
+
+/* optional: unify padding inside placeholder card */
+.sc-side-placeholder {
+  padding: 14px;      /* ✅ יותר נעים */
+}
+/* ===== Table grid lines (columns + rows) ===== */
+.table-container table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* header cells */
+.table-container th.mat-header-cell {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.10);
+}
+
+/* body cells */
+.table-container td.mat-cell {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* vertical lines between columns */
+.table-container th.mat-header-cell:not(:last-child),
+.table-container td.mat-cell:not(:last-child) {
+  border-left: 1px solid rgba(0, 0, 0, 0.08); /* RTL: border-left זה הקו בין עמודות */
+}
+
+/* optional: keep borders clean inside rounded table */
+.table-container table {
+  overflow: hidden;
+  border-radius: 10px;
+}
+/* center header + body cells (MDC) */
+.table-container .mat-mdc-header-cell,
+.table-container .mat-mdc-cell {
+  text-align: center;
+  justify-content: center;  /* ✅ important for flex cells */
+  align-items: center;
+}
+
+/* center the sort header content + icon */
+.table-container .mat-sort-header-container {
+  justify-content: center;
+}
+
+/* optional: center inner text spans too */
+.table-container .mat-mdc-header-cell *,
+.table-container .mat-mdc-cell * {
+  text-align: center;
+}
+:host ::ng-deep .table-container .mat-mdc-cell,
+:host ::ng-deep .table-container .mat-mdc-header-cell {
+  text-align: center !important;
+  justify-content: center !important; /* כי התאים הם flex */
+  align-items: center !important;
+}
+
+/* מרכז גם את הכותרת עם sort icon */
+:host ::ng-deep .table-container .mat-sort-header-container {
+  justify-content: center !important;
+}
+
+/* אם יש לך wrappers בכותרות (filter/date) – גם אותם למרכז */
+:host ::ng-deep .table-container .header-filter-wrapper,
+:host ::ng-deep .table-container .header-date-filter {
+  justify-content: center !important;
+}
+:host ::ng-deep .table-container th.mat-header-cell .mat-sort-header-container {
+  width: 100%;
+  justify-content: center !important;
+}
+
+:host ::ng-deep .table-container th.mat-header-cell .header-filter-wrapper,
+:host ::ng-deep .table-container th.mat-header-cell .header-date-filter {
+  width: 100%;
+  justify-content: center !important;
+}
+:host ::ng-deep .table-container .col-index {
+  text-align: center !important;
+  font-weight: 800 !important;   /* ✅ Bold */
+}
+:host ::ng-deep .table-container .mat-mdc-header-cell {
+  font-weight: 800 !important;      /* ✅ Bold */
+  color: #1a237e !important;        /* ✅ Blue */
+  background: #f8f9ff;              /* נשאיר רקע עדין */
+}
+:host ::ng-deep .table-container .mat-mdc-header-cell mat-icon {
+  color: #1a237e !important;
+  opacity: 0.9;
+}
+
+/* ===== ServiceCalls table header style (MDC) ===== */
+.table-container th.mat-mdc-header-cell,
+.table-container .mdc-data-table__header-cell {
+  color: #1a237e !important;        /* blue */
+  font-weight: 800 !important;      /* bold */
+}
+
+/* אם עדיין לא מתעדכן בגלל MDC שמגדיר color על תוכן פנימי */
+.table-container th.mat-mdc-header-cell *,
+.table-container .mdc-data-table__header-cell * {
+  color: #1a237e !important;
+  font-weight: 800 !important;
+}
+
+/* background של שורת header */
+.table-container thead tr,
+.table-container .mdc-data-table__header-row {
+  background: #f8f9ff !important;
+}
+.sc-table th.mat-mdc-header-cell,
+.sc-table .mdc-data-table__header-cell {
+  color: #1a237e !important;
+  font-weight: 800 !important;
+}
+.sc-table thead tr,
+.sc-table .mdc-data-table__header-row {
+  background: #f8f9ff !important;
+}
+/* ===== Service Calls table overrides (MDC) ===== */
+.sc-table th.mat-mdc-header-cell,
+.sc-table .mdc-data-table__header-cell {
+  background: #f8f9ff !important;
+}
+
+/* הכותרת עצמה (כולל mat-sort-header-content) */
+.sc-table th.mat-mdc-header-cell,
+.sc-table th.mat-mdc-header-cell *,
+.sc-table .mdc-data-table__header-cell,
+.sc-table .mdc-data-table__header-cell * ,
+.sc-table .mat-sort-header-content {
+  color: #1a237e !important;     /* כחול */
+  font-weight: 800 !important;   /* בולד */
+}
+
+/* גם האייקונים בכותרת */
+.sc-table th.mat-mdc-header-cell mat-icon {
+  color: #1a237e !important;
+  opacity: 0.9;
+}
+
+/* עמודת # (Header + Body) */
+.sc-table th.col-index,
+.sc-table td.col-index {
+  text-align: center !important;
+  font-weight: 900 !important;
+  color: #1a237e !important;
+}

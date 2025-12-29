@@ -1,19 +1,37 @@
-<div class="alert-wrap" dir="rtl">
+<mat-card class="sc-alert-box" dir="rtl">
+  <div class="sc-alert-title">הודעות</div>
 
-    <mat-card class="alert-card" *ngIf="errorMessage">
-      <div class="alert-error">{{ errorMessage }}</div>
-    </mat-card>
-  
-    <mat-card class="alert-card" *ngIf="!isLoading && !errorMessage && alerts.length === 0">
-      <div class="alert-empty">אין הודעות מערכת</div>
-    </mat-card>
-  
-    <mat-card class="alert-card" *ngFor="let a of alerts; trackBy: trackById">
-      <div class="alert-row">
-        <mat-icon class="alert-icon">campaign</mat-icon>
-        <div class="alert-text">{{ a.messageText }}</div>
-      </div>
-    </mat-card>
-  
+  <div class="sc-alert-loading" *ngIf="isLoading">טוען...</div>
+
+  <div class="sc-alert-error" *ngIf="!isLoading && errorMessage">
+    {{ errorMessage }}
   </div>
-  
+
+  <div class="sc-alert-empty" *ngIf="!isLoading && !errorMessage && alerts.length === 0">
+    אין הודעות כרגע
+  </div>
+
+  <div class="sc-alert-list" *ngIf="!isLoading && !errorMessage && alerts.length > 0">
+    <div class="sc-alert-item"
+         *ngFor="let a of alerts; trackBy: trackById"
+         [style.border-inline-start-color]="alertBorderColor(a)">
+
+      <div class="sc-alert-head">
+        <span class="sc-alert-badge" [style.background]="alertBorderColor(a)">
+          P{{ a.priority || 2 }}
+        </span>
+
+        <span class="sc-alert-created">
+          {{ a.createdAt | date:'dd/MM/yyyy HH:mm' }}
+        </span>
+      </div>
+
+      <div class="sc-alert-text">{{ a.messageText }}</div>
+
+      <div class="sc-alert-range" *ngIf="a.startAt || a.stopAt">
+        {{ formatRange(a) }}
+      </div>
+
+    </div>
+  </div>
+</mat-card>
