@@ -8,8 +8,7 @@ export interface ServiceCallModel {
   serviceCallID: number;
   title: string | null;
   description: string | null;
-
-  solutionText: string | null;   // 🔹 NEW
+  solutionText: string | null;
 
   requestUser: string | null;
   callbackPhone: string | null;
@@ -27,6 +26,19 @@ export interface ServiceCallModel {
   serviceRequestTypeID: number | null;
 
   entryTime?: string | null;
+
+  // Backend Update+Log
+  updatedBy?: string | null;
+  logLocation?: string | null;
+}
+
+export interface ServiceCallChangeLogModel {
+  changeTime: string;               // DateTime from server
+  changedBy: string | null;
+  logAction: string | null;         // UPDATE/...
+  fieldName: string | null;         // "כותרת" etc.
+  oldValueText: string | null;      // already translated text
+  newValueText: string | null;      // already translated text
 }
 
 export interface UserInChargeModel {
@@ -35,7 +47,6 @@ export interface UserInChargeModel {
   id_No: string | null;
   teamInChargeID: number | null;
 }
-
 
 export interface LookupItem {
   id: number;
@@ -50,24 +61,32 @@ export interface LookupItem {
 export class ServiceCallEditComponent implements OnInit {
 
   form!: FormGroup;
+
   isLoading = true;
   errorMessage = '';
+
   loggedUser: string | null = null;
   UserName: string | null = null;
   profilePictureUrl: string | null = null;
-  
+
   callId!: number;
 
-  // lookups
+  // Lookups
   mainCategories: LookupItem[] = [];
   sub1: LookupItem[] = [];
   sub2: LookupItem[] = [];
   statuses: LookupItem[] = [];
   priorities: LookupItem[] = [];
-  // you can add: usersInCharge, teams, requestTypes...
-  teams: LookupItem[] = [];                 // ✅ חדש – צוותים
-  usersAll: UserInChargeModel[] = [];       // כל המשתמשים
-  usersFiltered: UserInChargeModel[] = [];  // מסו
+  teams: LookupItem[] = [];
+
+  usersAll: UserInChargeModel[] = [];
+  usersFiltered: UserInChargeModel[] = [];
+
+  // Changes (logs)
+  changesLoading = false;
+  changesError = '';
+  changes: ServiceCallChangeLogModel[] = [];
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -76,47 +95,30 @@ export class ServiceCallEditComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.callId = +this.route.snapshot.paramMap.get('id')!;
-  
-    // ✅ defaults כדי שתמיד יראו משהו
+    this.callId = +(this.route.snapshot.paramMap.get('id') || 0);
+
+    // Defaults
     this.loggedUser = 'אורח';
     this.UserName = 'אורח';
     this.profilePictureUrl = 'assets/default-user.png';
-  
+
     this.buildForm();
     this.loadLookups();
-  
-    this.http.get<ServiceCallModel>(`${environment.apiBaseUrl}/api/ServiceCalls/${this.callId}`)
-      .subscribe({
-        next: call => {
-          this.form.patchValue(call);
-  
-          if (call.mainCategoryID) {
-            this.loadSub1(call.mainCategoryID, () => {
-              if (call.subCategory1ID) this.loadSub2(call.subCategory1ID);
-            });
-          }
-  
-          this.applyUsersFilter();
-          this.isLoading = false;
-        },
-        error: () => {
-          this.errorMessage = 'שגיאה בטעינת הקריאה';
-          this.isLoading = false;
-        }
-      });
+    this.loadServiceCall();
+    this.loadChanges(); // ✅ load timeline
   }
-  
-  private buildForm() {
+
+  private buildForm(): void {
     this.form = this.fb.group({
       title: [null],
       description: [null],
-      solutionText: [null],      // 🔹 NEW
+      solutionText: [null],
+
       requestUser: [null],
       callbackPhone: [null],
       location: [null],
       computerName: [null],
-  
+
       mainCategoryID: [null],
       subCategory1ID: [null],
       subCategory2ID: [null],
@@ -128,41 +130,63 @@ export class ServiceCallEditComponent implements OnInit {
       serviceRequestTypeID: [null]
     });
   }
-  
-  /* ---------- lookups ---------- */
 
-  private loadLookups() {
-    // Main categories
-    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/api/ServiceCalls/MainCategories`)
-      .subscribe(l => this.mainCategories = l);
-  
-    // Statuses
-    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/api/ServiceCalls/Statuses`)
-      .subscribe(l => this.statuses = l);
-  
-    // Priorities
-    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/api/ServiceCalls/Priorities`)
-      .subscribe(l => this.priorities = l);
-  
-    // ✅ Teams
-    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/api/ServiceCalls/TeamsInCharge`)
-      .subscribe(l => this.teams = l);
-  
-    // ✅ Users in charge
-    this.http.get<UserInChargeModel[]>(`${environment.apiBaseUrl}/api/ServiceCalls/UsersInCharge`)
-      .subscribe(list => {
-        this.usersAll = list;
-        this.applyUsersFilter();   // סינון ראשוני (במידה ויש כבר team בטופס)
+  private loadServiceCall(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.http.get<ServiceCallModel>(`${environment.apiBaseUrl}/api/ServiceCalls/${this.callId}`)
+      .subscribe({
+        next: (call) => {
+          this.form.patchValue(call);
+
+          if (call.mainCategoryID) {
+            this.loadSub1(call.mainCategoryID, () => {
+              if (call.subCategory1ID) {
+                this.loadSub2(call.subCategory1ID);
+              }
+            });
+          }
+
+          this.applyUsersFilter();
+          this.isLoading = false;
+        },
+        error: () => {
+          this.errorMessage = 'שגיאה בטעינת הקריאה';
+          this.isLoading = false;
+        }
       });
   }
-  
 
-  onMainCategoryChange(id: number) {
+  /* ---------- Lookups ---------- */
+
+  private loadLookups(): void {
+    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/api/ServiceCalls/MainCategories`)
+      .subscribe(l => this.mainCategories = l || []);
+
+    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/api/ServiceCalls/Statuses`)
+      .subscribe(l => this.statuses = l || []);
+
+    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/api/ServiceCalls/Priorities`)
+      .subscribe(l => this.priorities = l || []);
+
+    this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/api/ServiceCalls/TeamsInCharge`)
+      .subscribe(l => this.teams = l || []);
+
+    this.http.get<UserInChargeModel[]>(`${environment.apiBaseUrl}/api/ServiceCalls/UsersInCharge`)
+      .subscribe(list => {
+        this.usersAll = list || [];
+        this.applyUsersFilter();
+      });
+  }
+
+  onMainCategoryChange(id: number): void {
     this.form.patchValue({
       subCategory1ID: null,
       subCategory2ID: null,
       subCategory3ID: null
     });
+
     if (id) {
       this.loadSub1(id);
     } else {
@@ -171,93 +195,117 @@ export class ServiceCallEditComponent implements OnInit {
     }
   }
 
-  private loadSub1(mainCategoryId: number, callback?: () => void) {
+  private loadSub1(mainCategoryId: number, callback?: () => void): void {
     const params = new HttpParams().set('mainCategoryId', mainCategoryId.toString());
     this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/api/ServiceCalls/SubCategory1`, { params })
       .subscribe(list => {
-        this.sub1 = list;
+        this.sub1 = list || [];
         if (callback) callback();
       });
   }
 
-  onSubCategory1Change(id: number) {
+  onSubCategory1Change(id: number): void {
     this.form.patchValue({
       subCategory2ID: null,
       subCategory3ID: null
     });
 
     if (id) {
-      // ⭐ שימוש בפונקציה המשותפת
       this.loadSub2(id);
     } else {
       this.sub2 = [];
     }
   }
 
-  // ⭐ פונקציה חדשה לטעינת SubCategory2
-  private loadSub2(subCategory1Id: number, callback?: () => void) {
+  private loadSub2(subCategory1Id: number, callback?: () => void): void {
     const params = new HttpParams().set('subCategory1Id', subCategory1Id.toString());
     this.http.get<LookupItem[]>(`${environment.apiBaseUrl}/api/ServiceCalls/SubCategory2`, { params })
       .subscribe(list => {
-        this.sub2 = list;
+        this.sub2 = list || [];
         if (callback) callback();
       });
   }
 
-  /* ---------- save / cancel ---------- */
+  /* ---------- Team/User filtering ---------- */
 
-  save() {
-    if (this.form.invalid) return;
-
-    const body: ServiceCallModel = {
-      serviceCallID: this.callId,
-      ...this.form.value
-    };
-
-    this.isLoading = true;
-
-    this.http.put(`${environment.apiBaseUrl}/api/ServiceCalls/${this.callId}`, body)
-      .subscribe({
-        next: () => {
-          this.isLoading = false;
-          this.router.navigate(['/service-calls']); // back to list
-        },
-        error: err => {
-          this.isLoading = false;
-          this.errorMessage = 'שגיאה בשמירת הקריאה';
-        }
-      });
-  }
-
-  cancel() {
-    this.router.navigate(['/service-calls']);
-  }
-  private applyUsersFilter() {
+  private applyUsersFilter(): void {
     const teamId: number | null = this.form?.value?.teamInChargeID ?? null;
-  
+
     if (!teamId) {
-      this.usersFiltered = this.usersAll.slice(); // הכל
+      this.usersFiltered = this.usersAll.slice();
     } else {
       this.usersFiltered = this.usersAll.filter(u => u.teamInChargeID === teamId);
     }
   }
-  onTeamInChargeChange(teamId: number | null) {
+
+  onTeamInChargeChange(teamId: number | null): void {
     this.form.patchValue({
       teamInChargeID: teamId,
-      userInChargeID: null          // ננקה את הבחירה הישנה
+      userInChargeID: null
     });
     this.applyUsersFilter();
   }
-  
-  onUserInChargeChange(userId: number | null) {
+
+  onUserInChargeChange(userId: number | null): void {
     this.form.patchValue({ userInChargeID: userId });
-  
-    // אופציונלי: לעדכן את הצוות לפי המשתמש שנבחר
+
+    // Optional: sync team with user
     const u = this.usersAll.find(x => x.userInChargeID === userId);
     if (u && u.teamInChargeID) {
       this.form.patchValue({ teamInChargeID: u.teamInChargeID });
       this.applyUsersFilter();
     }
   }
-  
+
+  /* ---------- Save / Cancel ---------- */
+
+  save(): void {
+    if (this.form.invalid) return;
+
+    const body: ServiceCallModel = {
+      serviceCallID: this.callId,
+      ...this.form.value,
+      updatedBy: (this.loggedUser || this.UserName || 'אורח'),
+      logLocation: 'WEB'
+    };
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.http.put(`${environment.apiBaseUrl}/api/ServiceCalls/${this.callId}`, body)
+      .subscribe({
+        next: () => {
+          this.isLoading = false;
+          this.router.navigate(['/service-calls']);
+        },
+        error: () => {
+          this.isLoading = false;
+          this.errorMessage = 'שגיאה בשמירת הקריאה';
+        }
+      });
+  }
+
+  cancel(): void {
+    this.router.navigate(['/service-calls']);
+  }
+
+  /* ---------- Changes / Logs ---------- */
+
+  loadChanges(): void {
+    this.changesLoading = true;
+    this.changesError = '';
+
+    this.http
+      .get<ServiceCallChangeLogModel[]>(`${environment.apiBaseUrl}/api/ServiceCalls/${this.callId}/Changes`)
+      .subscribe({
+        next: (list) => {
+          this.changes = list || [];
+          this.changesLoading = false;
+        },
+        error: () => {
+          this.changesError = 'שגיאה בטעינת היסטוריית שינויים';
+          this.changesLoading = false;
+        }
+      });
+  }
 }

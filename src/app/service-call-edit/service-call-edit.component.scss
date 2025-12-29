@@ -1,22 +1,22 @@
+/* ===== Page layout (3 columns) ===== */
 .service-call-page {
   direction: rtl;
-  text-align: right;
-
   display: flex;
   gap: 16px;
-
   padding: 16px 24px;
   background: #f3f5fb;
-  min-height: calc(100vh - 64px);
+
+  height: calc(100vh - 64px);   /* גובה המסך */
   box-sizing: border-box;
+  align-items: stretch;
 
-  /* במקום max-width:1100 שמרכז הכל, פה אנחנו עובדים עם 3 עמודות */
-  width: 100%;
+  overflow: hidden; /* חשוב! שלא יהיה scroll בדף כולו */
 }
-
 /* עמודות 15/70/15 */
-.sc-col { min-width: 0; }
-.sc-right { flex: 0 0 15%; }
+.sc-col {
+  min-width: 0;
+  min-height: 0; /* CRITICAL for overflow inside */
+}.sc-right { flex: 0 0 15%; }
 .sc-center { flex: 0 0 70%; }
 .sc-left { flex: 0 0 15%; }
 
@@ -27,7 +27,20 @@
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
 }
+/* ✅ make all columns same height */
+.sc-right,
+.sc-center,
+.sc-left {
+  align-self: stretch;
+}
+/* ✅ make the RIGHT column behave like a full-height container */
+.sc-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 
+  min-height: 0;   /* CRITICAL */
+}
 .sc-user-row {
   display: flex;
   align-items: center;
@@ -210,4 +223,197 @@
 @media (max-width: 1200px) {
   .service-call-page { flex-direction: column; }
   .sc-right, .sc-center, .sc-left { flex: 0 0 auto; width: 100%; }
+}
+/* Right column stack */
+.sc-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Changes card */
+.sc-changes-card {
+  flex: 1 1 auto;    /* take remaining height in right column */
+  min-height: 0;     /* CRITICAL for scroll to work */
+  display: flex;
+  flex-direction: column;
+
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #d0d7e2;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
+  padding: 12px;
+}
+
+/* scroll area */
+.sc-changes-scroll {
+  flex: 1 1 auto;
+  min-height: 0;        /* CRITICAL */
+  overflow-y: auto;     /* scrollbar */
+  overflow-x: hidden;
+
+  padding-left: 6px;    /* RTL: space near scrollbar */
+}
+/* header stays fixed */
+
+.sc-changes-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  margin-bottom: 10px;
+}
+/* (optional) make scrollbar visible + nice */
+.sc-changes-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+.sc-changes-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.18);
+  border-radius: 10px;
+}
+.sc-changes-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sc-changes-title {
+  font-weight: 900;
+  font-size: 14px;
+  color: #1a237e;
+}
+
+.sc-changes-count {
+  min-width: 28px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(25,118,210,0.10);
+  color: #1976d2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 12px;
+}
+
+.sc-changes-loading,
+.sc-changes-empty {
+  color: #607d8b;
+  font-size: 12px;
+  padding: 6px 0;
+}
+
+.sc-changes-error {
+  color: #b71c1c;
+  font-weight: 900;
+  font-size: 12px;
+  padding: 6px 0;
+}
+
+/* Timeline */
+.sc-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sc-timeline-item {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  column-gap: 10px;
+}
+
+.sc-timeline-rail {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.sc-timeline-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #1976d2;
+  margin-top: 6px;
+  box-shadow: 0 0 0 3px rgba(25,118,210,0.12);
+}
+
+.sc-timeline-line {
+  position: absolute;
+  top: 18px;
+  bottom: -14px;
+  width: 2px;
+  background: rgba(0,0,0,0.12);
+}
+
+.sc-timeline-line.last {
+  display: none;
+}
+
+.sc-timeline-content {
+  background: #f8f9ff;
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 10px;
+  padding: 10px 10px;
+}
+
+.sc-timeline-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.sc-timeline-field {
+  font-weight: 900;
+  color: #1a237e;
+  font-size: 13px;
+}
+
+.sc-timeline-time {
+  font-size: 11px;
+  color: #546e7a;
+  white-space: nowrap;
+}
+
+.sc-timeline-meta {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #607d8b;
+}
+
+.sc-timeline-values {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.val {
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.val .lbl {
+  font-weight: 900;
+  margin-left: 6px;
+}
+
+.val.old {
+  background: rgba(244,67,54,0.08);
+  color: #b71c1c;
+}
+
+.val.new {
+  background: rgba(76,175,80,0.10);
+  color: #1b5e20;
+}
+
+/* make long text wrap nicely inside 15% column */
+.sc-timeline-content,
+.val .txt {
+  word-break: break-word;
+  white-space: normal;
 }

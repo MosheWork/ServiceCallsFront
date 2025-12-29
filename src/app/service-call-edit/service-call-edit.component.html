@@ -2,6 +2,8 @@
 
   <!-- RIGHT 15% - user card -->
   <div class="sc-col sc-right">
+
+    <!-- User Card -->
     <mat-card class="sc-user-card">
       <div class="sc-user-row">
         <img
@@ -16,8 +18,71 @@
         </div>
       </div>
     </mat-card>
-  </div>
+  
+    <!-- Changes Timeline (under user card) -->
+    <mat-card class="sc-changes-card" dir="rtl">
 
+      <!-- header (fixed, not scrolling) -->
+      <div class="sc-changes-head">
+        <div class="sc-changes-title">היסטוריית שינויים</div>
+        <div class="sc-changes-count" *ngIf="!changesLoading && !changesError">
+          {{ changes.length }}
+        </div>
+      </div>
+    
+      <!-- body (scrolling) -->
+      <div class="sc-changes-scroll">
+    
+        <div class="sc-changes-loading" *ngIf="changesLoading">טוען…</div>
+    
+        <div class="sc-changes-error" *ngIf="!changesLoading && changesError">
+          {{ changesError }}
+        </div>
+    
+        <div class="sc-changes-empty" *ngIf="!changesLoading && !changesError && changes.length === 0">
+          אין שינויים להצגה
+        </div>
+    
+        <div class="sc-timeline" *ngIf="!changesLoading && !changesError && changes.length > 0">
+          <div class="sc-timeline-item" *ngFor="let c of changes; let last = last">
+            <div class="sc-timeline-rail">
+              <div class="sc-timeline-dot"></div>
+              <div class="sc-timeline-line" [class.last]="last"></div>
+            </div>
+    
+            <div class="sc-timeline-content">
+              <div class="sc-timeline-top">
+                <div class="sc-timeline-field">{{ c.fieldName || '-' }}</div>
+                <div class="sc-timeline-time">{{ c.changeTime | date:'dd/MM HH:mm' }}</div>
+              </div>
+    
+              <div class="sc-timeline-meta">
+                <span class="by">{{ c.changedBy || 'לא ידוע' }}</span>
+                <span class="action" *ngIf="c.logAction">• {{ c.logAction }}</span>
+              </div>
+    
+              <div class="sc-timeline-values">
+                <div class="val old" *ngIf="c.oldValueText">
+                  <span class="lbl">לפני:</span>
+                  <span class="txt">{{ c.oldValueText }}</span>
+                </div>
+    
+                <div class="val new" *ngIf="c.newValueText">
+                  <span class="lbl">אחרי:</span>
+                  <span class="txt">{{ c.newValueText }}</span>
+                </div>
+              </div>
+            </div>
+    
+          </div>
+        </div>
+    
+      </div>
+    </mat-card>
+    
+  
+  </div>
+  
   <!-- CENTER 70% - your existing content -->
   <div class="sc-col sc-center">
 
