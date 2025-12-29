@@ -6,11 +6,12 @@
   padding: 16px 24px;
   background: #f3f5fb;
 
-  height: calc(100vh - 64px);   /* גובה המסך */
+  /* IMPORTANT: give the flex row a real height so children can stretch */
+  height: calc(100vh - 64px);
   box-sizing: border-box;
-  align-items: stretch;
 
-  overflow: hidden; /* חשוב! שלא יהיה scroll בדף כולו */
+  /* allow children to use min-height:0 for scrolling */
+  align-items: stretch;
 }
 /* עמודות 15/70/15 */
 .sc-col {
